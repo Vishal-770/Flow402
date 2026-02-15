@@ -8,6 +8,13 @@
       "when": 1766844694870,
       "tag": "0000_third_junta",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1771162230160,
+      "tag": "0001_pale_puppet_master",
+      "breakpoints": true
     }
   ]
 }
