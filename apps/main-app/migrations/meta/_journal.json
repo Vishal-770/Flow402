@@ -15,6 +15,13 @@
       "when": 1771162230160,
       "tag": "0001_pale_puppet_master",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1771216294508,
+      "tag": "0002_cheerful_hellfire_club",
+      "breakpoints": true
     }
   ]
 }

@@ -7,7 +7,6 @@ import {
   index,
   uniqueIndex,
   integer,
-  decimal,
   pgEnum,
 } from "drizzle-orm/pg-core";
 
@@ -129,7 +128,7 @@ export const apiEndpoints = pgTable(
     sampleResponse: text("sample_response"),
     providerId: text("provider_id").notNull(),
     walletId: text("wallet_id").notNull(),
-    priceUsd: decimal("price_usd", { precision: 10, scale: 4 }).notNull(),
+    priceAmount: text("price_amount").notNull(),
     tokenId: text("token_id").notNull(),
     providerUrl: text("provider_url").notNull(),
     gatewayPath: text("gateway_path").notNull().unique(),
@@ -140,6 +139,7 @@ export const apiEndpoints = pgTable(
   },
   (table) => [
     index("api_endpoints_provider_id_idx").on(table.providerId),
+    index("api_endpoints_token_id_idx").on(table.tokenId),
     index("api_endpoints_is_active_idx").on(table.isActive),
   ],
 );
@@ -203,7 +203,7 @@ export const apiCalls = pgTable(
     id: text("id").primaryKey(),
     apiEndpointId: text("api_endpoint_id").notNull(),
     callerWallet: text("caller_wallet").notNull(),
-    priceUsd: decimal("price_usd", { precision: 10, scale: 4 }).notNull(),
+    priceAmount: text("price_amount").notNull(),
     status: apiCallStatus("status").notNull(),
     requestHash: text("request_hash").unique(),
     errorMessage: text("error_message"),

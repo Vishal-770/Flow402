@@ -55,3 +55,28 @@ export async function POST(req: Request) {
     }
   }
 }
+
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const publicId = searchParams.get("public_id");
+
+    if (!publicId) {
+      return NextResponse.json(
+        { success: false, message: "No public_id provided" },
+        { status: 400 },
+      );
+    }
+
+    await cloudinary.uploader.destroy(publicId);
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Delete error:", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to delete image" },
+      { status: 500 },
+    );
+  }
+}
+

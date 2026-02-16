@@ -8,7 +8,7 @@ import axios from "axios";
  * @returns Promise resolving to the uploaded image URL
  * @throws Error if upload fails
  */
-export async function uploadImage(file: File): Promise<string> {
+export async function uploadImage(file: File): Promise<{ url: string; publicId: string }> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -16,11 +16,11 @@ export async function uploadImage(file: File): Promise<string> {
       try {
         const base64Data = reader.result as string;
         
-        const response = await axios.post<{ url: string; success: boolean; message?: string }>("/api/upload", {
+        const response = await axios.post<{ url: string; public_id: string; success: boolean; message?: string }>("/api/upload", {
           file: base64Data,
         });
 
-        resolve(response.data.url);
+        resolve({ url: response.data.url, publicId: response.data.public_id });
       } catch (error) {
         if (axios.isAxiosError(error) && error.response?.data?.message) {
             reject(new Error(error.response.data.message));

@@ -76,7 +76,7 @@ export default function CreateTokenPage() {
 
     setIsUploading(true);
     try {
-      const url = await uploadImage(file);
+      const { url } = await uploadImage(file);
       form.setValue("imageUri", url);
       toast.success("Icon uploaded successfully");
     } catch (error) {

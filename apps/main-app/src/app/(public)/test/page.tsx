@@ -27,7 +27,7 @@ export default function UploadPage() {
     setLoading(true);
 
     try {
-      const url = await uploadImage(file);
+      const { url } = await uploadImage(file);
       setImageUrl(url);
     } catch (error) {
       if (error instanceof Error) {
