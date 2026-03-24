@@ -18,7 +18,7 @@ Echoes back the request body.
 - **Example**: `POST /echo` with `{"test": "data"}`
 
 ### 3. GET `/status`
-Returns server status and uptime.
+Returns server status and uptime.   
 - **Example**: `GET /status`
 
 ### 4. Catch-all `/*`

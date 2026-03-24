@@ -11,6 +11,11 @@ const Navbar = () => {
   const { data: session, isPending } = authClient.useSession();
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleSignOut = async () => {
     setIsLoggingOut(true);
@@ -68,7 +73,7 @@ const Navbar = () => {
       </div>
 
       <div className="flex items-center space-x-4">
-        {isPending ? (
+        {!isMounted || isPending ? (
           <div className="h-8 w-8 animate-pulse bg-muted rounded-full" />
         ) : session ? (
           <div className="flex items-center space-x-4">

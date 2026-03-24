@@ -43,18 +43,76 @@ function setHeaders(
     return;
   }
 
+  const serializeHeaderValue = (input: unknown): string | undefined => {
+    if (input === undefined || input === null) {
+      return undefined;
+    }
+    if (
+      typeof input === 'string' ||
+      typeof input === 'number' ||
+      typeof input === 'boolean'
+    ) {
+      return String(input);
+    }
+    try {
+      return JSON.stringify(input);
+    } catch {
+      return undefined;
+    }
+  };
+
   Object.entries(headers).forEach(([key, value]) => {
-    if (Array.isArray(value)) {
-      res.setHeader(
-        key,
-        value.map((v) => String(v)),
-      );
+    const lowerKey = key.toLowerCase();
+
+    if (lowerKey === 'payment-required') {
+      // Alias facilitator header name to what thirdweb fetchWithPayment expects.
+      if (Array.isArray(value)) {
+        const mapped = value
+          .map((v) => serializeHeaderValue(v))
+          .filter((v): v is string => v !== undefined);
+        res.setHeader('payment-required', mapped);
+        res.setHeader('x-payment-required', mapped);
+      } else {
+        const mapped = serializeHeaderValue(value);
+        if (!mapped) {
+          return;
+        }
+        res.setHeader('payment-required', mapped);
+        res.setHeader('x-payment-required', mapped);
+      }
       return;
     }
-    if (value !== undefined && value !== null) {
-      res.setHeader(key, String(value));
+
+    if (Array.isArray(value)) {
+      const mapped = value
+        .map((v) => serializeHeaderValue(v))
+        .filter((v): v is string => v !== undefined);
+      if (mapped.length === 0) {
+        return;
+      }
+      res.setHeader(key, mapped);
+      return;
+    }
+    const mapped = serializeHeaderValue(value);
+    if (mapped !== undefined) {
+      res.setHeader(key, mapped);
     }
   });
+}
+
+function hasUsableX402Headers(
+  headers: Record<string, unknown> | undefined,
+): boolean {
+  if (!headers) {
+    return false;
+  }
+
+  const keys = Object.keys(headers).map((key) => key.toLowerCase());
+  return (
+    keys.includes('x-payment-required') ||
+    keys.includes('payment-required') ||
+    keys.includes('www-authenticate')
+  );
 }
 
 @Injectable()
@@ -145,9 +203,12 @@ export class GatewayService {
 
       // 2. Settle Payment via Thirdweb x402
       let result: Awaited<ReturnType<typeof settlePayment>>;
+      const originalUrl = req.originalUrl || '';
+      const queryIndex = originalUrl.indexOf('?');
+      const querySuffix = queryIndex >= 0 ? originalUrl.slice(queryIndex) : '';
       try {
         result = await settlePayment({
-          resourceUrl: `${endpoint.providerUrl}${remainingPath}`,
+          resourceUrl: `${endpoint.providerUrl}${remainingPath}${querySuffix}`,
           method: req.method,
           paymentData,
           payTo: endpoint.payTo as `0x${string}`,
@@ -170,6 +231,14 @@ export class GatewayService {
           errorMessage = `X402 Configuration Error: Unsupported payment signature scheme for chainId=${endpoint.chainId}, token=${endpoint.assetAddress}. Verify token, chain, and facilitator support.`;
         }
 
+        const responseStatus =
+          typeof settleError === 'object' &&
+          settleError !== null &&
+          'responseStatus' in settleError &&
+          typeof (settleError as { responseStatus?: unknown })
+            .responseStatus === 'number'
+            ? (settleError as { responseStatus: number }).responseStatus
+            : undefined;
         const responseHeaders =
           typeof settleError === 'object' &&
           settleError !== null &&
@@ -177,12 +246,26 @@ export class GatewayService {
             ? (settleError as { responseHeaders?: Record<string, unknown> })
                 .responseHeaders
             : undefined;
-        setHeaders(res, responseHeaders);
+        const responseBody =
+          typeof settleError === 'object' &&
+          settleError !== null &&
+          'responseBody' in settleError
+            ? (settleError as { responseBody?: unknown }).responseBody
+            : undefined;
 
-        return res.status(402).json({
+        if (responseStatus === 402 && hasUsableX402Headers(responseHeaders)) {
+          setHeaders(res, responseHeaders);
+          return res.status(402).json(
+            responseBody ?? {
+              error: 'Payment Required',
+            },
+          );
+        }
+
+        return res.status(500).json({
           success: false,
-          message: errorMessage,
-          error: 'Payment Required or Configuration Error',
+          message: errorMessage || 'Failed to create x402 payment challenge',
+          error: 'X402 Settlement Error',
         });
       }
 
