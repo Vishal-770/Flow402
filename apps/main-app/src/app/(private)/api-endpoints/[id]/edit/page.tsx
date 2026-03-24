@@ -70,6 +70,8 @@ const editSchema = z.object({
   category: z.string().min(1, "Category is required"),
   imageUrl: z.string().url().optional().or(z.literal("")),
   docsUrl: z.string().url().optional().or(z.literal("")),
+  gatewayPath: z.string().regex(/^\/[a-zA-Z0-9\-_/]*$/, "Must start with /").optional().or(z.literal("")),
+  providerUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   tags: z.array(z.string()).optional(),
   upstreamHeaders: z.array(z.object({
     headerName: z.string().min(1, "Header name is required"),
@@ -109,6 +111,8 @@ export default function EditApiEndpointPage() {
       category: "",
       imageUrl: "",
       docsUrl: "",
+      gatewayPath: "",
+      providerUrl: "",
       tags: [],
       upstreamHeaders: [],
       queryParams: [],
@@ -154,11 +158,14 @@ export default function EditApiEndpointPage() {
   // Pre-populate form when data arrives
   useEffect(() => {
     if (endpointData) {
+      console.log("Edit page - fetched endpointData:", endpointData);
       reset({
         description: endpointData.description || "",
         category: endpointData.category || "",
         imageUrl: endpointData.imageUrl || "",
         docsUrl: endpointData.docsUrl || "",
+        gatewayPath: endpointData.gatewayPath || "",
+        providerUrl: endpointData.providerUrl || "",
         tags: endpointData.tags || [],
         upstreamHeaders: endpointData.apiUpstreamHeaders?.map((h: any) => ({
           headerName: h.headerName,
@@ -179,6 +186,7 @@ export default function EditApiEndpointPage() {
           exampleValue: b.exampleValue || "",
         })) || [],
       });
+ 
     }
   }, [endpointData, reset]);
 
@@ -260,7 +268,7 @@ export default function EditApiEndpointPage() {
         </div>
 
         <form onSubmit={handleSubmit(onUpdateSubmit)} className="space-y-8">
-            <Tabs defaultValue="basic" className="w-full">
+            <Tabs key={endpointData?.id || "loading"} defaultValue="basic" className="w-full">
                 <TabsList className="grid grid-cols-2 max-w-md mx-auto mb-8 rounded-2xl p-1 bg-muted/50 backdrop-blur-sm h-14">
                     <TabsTrigger value="basic" className="rounded-xl h-full data-[state=active]:bg-background data-[state=active]:shadow-sm">Basic Info</TabsTrigger>
                     <TabsTrigger value="specs" className="rounded-xl h-full data-[state=active]:bg-background data-[state=active]:shadow-sm">Technical Specs</TabsTrigger>
@@ -297,7 +305,7 @@ export default function EditApiEndpointPage() {
                                             control={control}
                                             name="category"
                                             render={({ field }) => (
-                                            <Select onValueChange={field.onChange} value={field.value ?? undefined}>
+                                            <Select onValueChange={field.onChange} value={field.value || undefined} defaultValue={endpointData?.category || ""} >
                                                 <SelectTrigger className="rounded-2xl">
                                                     <SelectValue placeholder="Select a category" />
                                                 </SelectTrigger>
@@ -324,6 +332,36 @@ export default function EditApiEndpointPage() {
                                         {errors.docsUrl && (
                                             <p className="text-xs text-destructive flex items-center gap-1">
                                                 <AlertCircle className="h-3 w-3" /> {errors.docsUrl.message}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="gatewayPath">Gateway Path <span className="text-destructive">*</span></Label>
+                                        <Input
+                                            id="gatewayPath"
+                                            placeholder="/my-api-v1"
+                                            {...form.register("gatewayPath")}
+                                            className="rounded-2xl"
+                                        />
+                                        {errors.gatewayPath && (
+                                            <p className="text-xs text-destructive flex items-center gap-1">
+                                                <AlertCircle className="h-3 w-3" /> {errors.gatewayPath.message}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="providerUrl">Provider (Upstream) URL <span className="text-destructive">*</span></Label>
+                                        <Input
+                                            id="providerUrl"
+                                            placeholder="https://api.yourprovider.com/v1"
+                                            {...form.register("providerUrl")}
+                                            className="rounded-2xl"
+                                        />
+                                        {errors.providerUrl && (
+                                            <p className="text-xs text-destructive flex items-center gap-1">
+                                                <AlertCircle className="h-3 w-3" /> {errors.providerUrl.message}
                                             </p>
                                         )}
                                     </div>

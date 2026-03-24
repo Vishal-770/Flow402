@@ -104,6 +104,8 @@ export async function PATCH(
           category: body.category,
           imageUrl: body.imageUrl,
           docsUrl: body.docsUrl,
+          gatewayPath: body.gatewayPath,
+          providerUrl: body.providerUrl,
           updatedAt: now,
         })
         .where(eq(apiEndpoints.id, id));
