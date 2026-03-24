@@ -21,6 +21,7 @@ export const metadata: Metadata = {
 };
 
 import QueryProvider from "@/src/components/query-provider";
+import Navbar from "../components/Navbar";
 
 export default function RootLayout({
   children,
@@ -40,7 +41,10 @@ export default function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              {children}
+              <Navbar />
+              <main className="pt-16 min-h-screen">
+                {children}
+              </main>
               <Toaster richColors position="top-center" />
             </ThemeProvider>
           </QueryProvider>

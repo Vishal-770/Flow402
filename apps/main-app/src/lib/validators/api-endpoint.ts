@@ -32,9 +32,9 @@ export const createApiEndpointSchema = z.object({
   providerUrl: z.string().url("Must be a valid URL").min(1, "Provider URL is required"),
   gatewayPath: z
     .string()
-    .min(1, "Gateway path is required")
-    .regex(/^\/[a-zA-Z0-9\-_/]+$/, "Must start with / and contain only letters, numbers, hyphens, underscores, and slashes")
-    .optional(),
+    .regex(/^\/[a-zA-Z0-9\-_/]*$/, "Must start with / and contain only letters, numbers, hyphens, underscores, and slashes")
+    .optional()
+    .or(z.literal("")),
   category: z.string().optional(),
   upstreamHeaders: z.array(upstreamHeaderSchema).optional(),
   queryParams: z.array(queryParamSchema).optional(),

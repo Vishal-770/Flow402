@@ -217,61 +217,6 @@ const ProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation Header */}
-      <nav className="bg-card shadow-sm border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-8">
-              <Link
-                href="/"
-                className="text-xl font-bold text-foreground hover:text-primary transition-colors"
-              >
-                Better Auth
-              </Link>
-              <div className="hidden md:flex space-x-6">
-                <Link
-                  href="/dashboard"
-                  className="text-muted-foreground hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  href="/profile"
-                  className="text-foreground hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                >
-                  Profile
-                </Link>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              {session && (
-                <>
-                  <span className="text-sm text-muted-foreground">
-                    Welcome, {session.user.name || session.user.email}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleSignOut}
-                    disabled={isLoggingOut}
-                    className="ml-4"
-                  >
-                    {isLoggingOut ? (
-                      <>
-                        <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
-                        Signing out...
-                      </>
-                    ) : (
-                      "Sign Out"
-                    )}
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </nav>
-
       {/* Main Content */}
       <main className="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">

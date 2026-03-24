@@ -36,64 +36,109 @@ const Navbar = () => {
     });
   };
 
+  const navLinks = [
+    { name: "Home", href: "/" },
+    { name: "Dashboard", href: "/dashboard" },
+    { name: "API Endpoints", href: "/api-endpoints" },
+    { name: "Chains", href: "/chains" },
+    { name: "Tokens", href: "/tokens" },
+  ];
+
   return (
-    <nav className="flex items-center justify-between w-screen h-16 px-8 bg-background text-foreground">
-      <div className="flex items-center space-x-4">
-        <Link href="/">Home</Link>
-        <Link href="/dashboard">Dashboard</Link>
-        <Link href="/profile">Profile</Link>
+    <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between h-16 px-6 md:px-12 bg-background/80 backdrop-blur-md border-b border-border transition-all duration-300">
+      <div className="flex items-center space-x-8">
+        <Link href="/" className="flex items-center space-x-2 group">
+          <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center font-bold text-primary-foreground shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
+            F
+          </div>
+          <span className="text-xl font-bold tracking-tight hidden sm:block bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
+            Flow402
+          </span>
+        </Link>
+        <div className="hidden lg:flex items-center space-x-2">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary hover:bg-muted/50 rounded-md transition-all"
+            >
+              {link.name}
+            </Link>
+          ))}
+        </div>
       </div>
+
       <div className="flex items-center space-x-4">
         {isPending ? (
-          <span className="text-sm text-muted-foreground">Loading...</span>
+          <div className="h-8 w-8 animate-pulse bg-muted rounded-full" />
         ) : session ? (
-          <>
-            <span className="text-sm text-muted-foreground">
-              {session.user.name || session.user.email}
-            </span>
+          <div className="flex items-center space-x-4">
+            <Link
+              href="/profile"
+              className="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-muted/50 hover:bg-muted border border-border transition-all"
+            >
+              <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">
+                {session.user.name?.[0] || session.user.email[0]}
+              </div>
+              <span className="text-sm font-medium max-w-[120px] truncate">
+                {session.user.name || session.user.email.split("@")[0]}
+              </span>
+            </Link>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={handleSignOut}
               disabled={isLoggingOut}
+              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
             >
               {isLoggingOut ? (
-                <>
-                  <svg
-                    className="animate-spin -ml-1 mr-2 h-4 w-4"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Signing out...
-                </>
+                <Loader2 />
               ) : (
                 "Sign Out"
               )}
             </Button>
-          </>
+          </div>
         ) : (
-          <Link href="/signin">
-            <Button size="sm">Sign In</Button>
-          </Link>
+          <div className="flex items-center space-x-2">
+            <Link href="/signin">
+              <Button variant="ghost" size="sm">
+                Sign In
+              </Button>
+            </Link>
+            <Link href="/signin">
+              <Button size="sm" className="bg-primary hover:bg-primary/90">
+                Get Started
+              </Button>
+            </Link>
+          </div>
         )}
       </div>
     </nav>
   );
 };
+
+const Loader2 = () => (
+  <svg
+    className="animate-spin h-4 w-4"
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+  >
+    <circle
+      className="opacity-25"
+      cx="12"
+      cy="12"
+      r="10"
+      stroke="currentColor"
+      strokeWidth="4"
+    ></circle>
+    <path
+      className="opacity-75"
+      fill="currentColor"
+      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+    ></path>
+  </svg>
+);
+
 
 export default Navbar;

@@ -507,7 +507,7 @@ export default function CreateApiEndpointPage() {
           <div className="space-y-8 animate-in slide-in-from-right duration-500 pb-10">
             <h2 className="text-xl font-semibold mb-4 text-foreground">Endpoint Details</h2>
             <div className="max-w-2xl space-y-6">
-                 <div className="space-y-2">
+                <div className="space-y-2">
                     <Label htmlFor="providerUrl">
                     Provider URL <span className="text-destructive">*</span>
                     </Label>
@@ -524,6 +524,38 @@ export default function CreateApiEndpointPage() {
                     )}
                     <p className="text-xs text-muted-foreground">
                     The upstream URL your API proxies to
+                    </p>
+                </div>
+
+                <div className="space-y-2">
+                    <Label htmlFor="gatewayPath">
+                    Gateway Path (Optional)
+                    </Label>
+                    <div className="flex">
+                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-muted-foreground text-sm">
+                            /
+                        </span>
+                        <Input
+                            id="gatewayPath"
+                            placeholder="my-awesome-api"
+                            {...form.register("gatewayPath")}
+                            className={`rounded-l-none ${errors.gatewayPath ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                            onChange={(e) => {
+                                let val = e.target.value;
+                                if (val && !val.startsWith("/")) {
+                                    val = "/" + val;
+                                }
+                                form.setValue("gatewayPath", val);
+                            }}
+                        />
+                    </div>
+                    {errors.gatewayPath && (
+                    <p className="text-xs text-destructive flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" /> {errors.gatewayPath.message}
+                    </p>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                    The path where your API will be exposed on Flow402. Leave empty for auto-generated.
                     </p>
                 </div>
 
