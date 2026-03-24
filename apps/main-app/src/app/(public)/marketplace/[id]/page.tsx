@@ -1,18 +1,22 @@
 "use client";
 
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import { formatUnits } from "@/src/lib/utils/units";
+import { authClient } from "@/src/lib/auth-client";
 import { Button } from "@/src/components/ui/button";
 import { Badge } from "@/src/components/ui/badge";
+import { Input } from "@/src/components/ui/input";
+import { Textarea } from "@/src/components/ui/textarea";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/src/components/ui/card";
 import {
   Tabs,
@@ -32,13 +36,29 @@ import {
   ExternalLink,
   ArrowRight,
   Clock,
-  Database
+  Database,
+  Star,
+  MessageSquare,
+  User as UserIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
 import { toast } from "sonner";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
+
+interface Review {
+  id: string;
+  rating: number;
+  comment: string | null;
+  createdAt: string;
+  reviewerName: string | null;
+  reviewerImage: string | null;
+}
+
+interface ReviewStats {
+  averageRating: number;
+  totalCount: number;
+}
 
 interface MarketplaceEndpointDetail {
   id: string;
@@ -67,7 +87,12 @@ interface MarketplaceEndpointDetail {
 export default function EndpointDetailPage() {
   const { id } = useParams();
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const { data: session } = authClient.useSession();
+  
   const [copied, setCopied] = useState(false);
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState("");
 
   const detailQuery = useQuery<{ success: boolean; data: MarketplaceEndpointDetail }>({
     queryKey: ["marketplace-detail", id],
@@ -78,13 +103,54 @@ export default function EndpointDetailPage() {
     enabled: !!id,
   });
 
+  const reviewsQuery = useQuery<{ success: boolean; data: Review[]; stats: ReviewStats }>({
+    queryKey: ["marketplace-reviews", id],
+    queryFn: async () => {
+      const res = await axios.get(`/api/marketplace/${id}/reviews`);
+      return res.data;
+    },
+    enabled: !!id,
+  });
+
+  const reviewMutation = useMutation({
+    mutationFn: async (newReview: { rating: number; comment: string }) => {
+      const res = await axios.post(`/api/marketplace/${id}/reviews`, newReview);
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success("Review submitted successfully");
+      setComment("");
+      setRating(5);
+      queryClient.invalidateQueries({ queryKey: ["marketplace-reviews", id] });
+    },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Failed to submit review";
+      toast.error(message);
+    },
+  });
+
   const endpoint = detailQuery.data?.data;
+  const reviews = reviewsQuery.data?.data ?? [];
+  const stats = reviewsQuery.data?.stats;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     setCopied(true);
     toast.success("Copied to clipboard");
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleReviewSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!session) {
+        toast.error("Please sign in to post a review");
+        return;
+    }
+    if (!comment.trim()) {
+        toast.error("Comment is required");
+        return;
+    }
+    reviewMutation.mutate({ rating, comment });
   };
 
   if (detailQuery.isLoading) {
@@ -153,10 +219,10 @@ export default function EndpointDetailPage() {
                         <Shield className="h-3 w-3 mr-1 text-primary" />
                         {endpoint.chainName}
                     </Badge>
-                    <Badge variant="outline" className="bg-background/50 backdrop-blur-sm capitalize">
-                        <Clock className="h-3 w-3 mr-1 text-primary" />
-                        Active since {new Date(endpoint.createdAt).toLocaleDateString()}
-                    </Badge>
+                    <div className="flex items-center gap-1 bg-yellow-400/10 text-yellow-600 dark:text-yellow-400 px-2 py-0.5 rounded-full text-xs font-bold border border-yellow-400/20">
+                        <Star className="h-3 w-3 fill-current" />
+                        {stats?.averageRating.toFixed(1) || "0.0"} ({stats?.totalCount || 0})
+                    </div>
                 </div>
                 <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
                     {endpoint.description || "Unnamed API Endpoint"}
@@ -186,99 +252,222 @@ export default function EndpointDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-8">
-                {/* Description & Overview */}
-                <Card className="rounded-[2.5rem] border-border/50 shadow-xl overflow-hidden bg-card/50 backdrop-blur-sm">
-                    <CardHeader className="pb-4">
-                        <CardTitle className="text-2xl">Overview</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <p className="text-lg text-muted-foreground leading-relaxed">
-                            {endpoint.description || "This API provides a high-performance, decentralized gateway to various data sources and computational services with native Web3 payments."}
-                        </p>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="p-4 rounded-2xl bg-muted/50 border border-border/50">
-                                <h4 className="text-sm font-bold flex items-center gap-2 mb-2">
-                                    <Zap className="h-4 w-4 text-primary" /> Instant Integration
-                                </h4>
-                                <p className="text-xs text-muted-foreground">Connect via our global edge gateway with minimal latency.</p>
-                            </div>
-                            <div className="p-4 rounded-2xl bg-muted/50 border border-border/50">
-                                <h4 className="text-sm font-bold flex items-center gap-2 mb-2">
-                                    <Shield className="h-4 w-4 text-blue-500" /> Secure Payments
-                                </h4>
-                                <p className="text-xs text-muted-foreground">Pay-per-use directly in {endpoint.tokenSymbol} on the {endpoint.chainName} network.</p>
-                            </div>
+                <Tabs defaultValue="overview" className="w-full">
+                    <TabsList className="bg-background/50 backdrop-blur-md border border-border/50 p-1 rounded-2xl h-14 mb-8">
+                        <TabsTrigger value="overview" className="rounded-xl px-8 h-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Overview</TabsTrigger>
+                        <TabsTrigger value="integration" className="rounded-xl px-8 h-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Integration</TabsTrigger>
+                        <TabsTrigger value="reviews" className="rounded-xl px-8 h-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all flex items-center gap-2">
+                            Reviews <Badge variant="secondary" className="px-1.5 py-0 h-4 min-w-[16px] flex items-center justify-center">{stats?.totalCount || 0}</Badge>
+                        </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="overview" className="space-y-8 mt-0 outline-none">
+                        <Card className="rounded-[2.5rem] border-border/50 shadow-xl overflow-hidden bg-card/50 backdrop-blur-sm">
+                            <CardHeader className="pb-4">
+                                <CardTitle className="text-2xl">API Overview</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                                <p className="text-lg text-muted-foreground leading-relaxed">
+                                    {endpoint.description || "This API provides a high-performance, decentralized gateway to various data sources and computational services with native Web3 payments."}
+                                </p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="p-4 rounded-2xl bg-muted/50 border border-border/50">
+                                        <h4 className="text-sm font-bold flex items-center gap-2 mb-2">
+                                            <Zap className="h-4 w-4 text-primary" /> Instant Integration
+                                        </h4>
+                                        <p className="text-xs text-muted-foreground">Connect via our global edge gateway with minimal latency.</p>
+                                    </div>
+                                    <div className="p-4 rounded-2xl bg-muted/50 border border-border/50">
+                                        <h4 className="text-sm font-bold flex items-center gap-2 mb-2">
+                                            <Shield className="h-4 w-4 text-blue-500" /> Secure Payments
+                                        </h4>
+                                        <p className="text-xs text-muted-foreground">Pay-per-use directly in {endpoint.tokenSymbol} on the {endpoint.chainName} network.</p>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Sample Response */}
+                        {endpoint.sampleResponse && (
+                            <Card className="rounded-[2.5rem] border-border/50 shadow-xl overflow-hidden bg-card/50 backdrop-blur-sm">
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2 text-xl">
+                                        <Database className="h-5 w-5 text-primary" /> Sample Response
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <pre className="p-6 rounded-2xl bg-zinc-950 text-zinc-300 font-mono text-xs overflow-x-auto shadow-inner border border-zinc-800">
+                                        {endpoint.sampleResponse}
+                                    </pre>
+                                </CardContent>
+                            </Card>
+                        )}
+                    </TabsContent>
+
+                    <TabsContent value="integration" className="mt-0 outline-none">
+                        <Card className="rounded-[2.5rem] border-border/50 shadow-xl overflow-hidden bg-card/50 backdrop-blur-sm">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <Code2 className="h-6 w-6 text-primary" /> Integration Guide
+                                </CardTitle>
+                                <CardDescription>Use the following sample to integrate this API into your application.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <Tabs defaultValue="curl" className="w-full">
+                                    <TabsList className="grid w-full grid-cols-3 rounded-xl mb-4">
+                                        <TabsTrigger value="curl" className="rounded-lg">cURL</TabsTrigger>
+                                        <TabsTrigger value="js" className="rounded-lg">JavaScript</TabsTrigger>
+                                        <TabsTrigger value="python" className="rounded-lg">Python</TabsTrigger>
+                                    </TabsList>
+                                    <TabsContent value="curl" className="relative group">
+                                        <pre className="p-6 rounded-2xl bg-muted font-mono text-sm overflow-x-auto border border-border/50">
+                                            {curlExample}
+                                        </pre>
+                                        <Button 
+                                            size="icon" 
+                                            variant="ghost" 
+                                            className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            onClick={() => copyToClipboard(curlExample)}
+                                        >
+                                            {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                                        </Button>
+                                    </TabsContent>
+                                    <TabsContent value="js">
+                                        <pre className="p-6 rounded-2xl bg-muted font-mono text-sm overflow-x-auto border border-border/50 text-muted-foreground">
+                                            // SDK Integration Guide coming soon...
+                                        </pre>
+                                    </TabsContent>
+                                    <TabsContent value="python">
+                                        <pre className="p-6 rounded-2xl bg-muted font-mono text-sm overflow-x-auto border border-border/50 text-muted-foreground">
+                                            # SDK Integration Guide coming soon...
+                                        </pre>
+                                    </TabsContent>
+                                </Tabs>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+
+                    <TabsContent value="reviews" className="mt-0 outline-none space-y-8">
+                        {/* Review Form */}
+                        {session ? (
+                           <Card className="rounded-[2.5rem] border-primary/20 bg-primary/5 overflow-hidden">
+                                <form onSubmit={handleReviewSubmit}>
+                                    <CardHeader>
+                                        <CardTitle className="text-xl flex items-center gap-2">
+                                            <MessageSquare className="h-5 w-5 text-primary" /> Post a Review
+                                        </CardTitle>
+                                        <CardDescription>Share your experience with this API with the community.</CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="space-y-6">
+                                        <div className="space-y-3">
+                                            <p className="text-sm font-medium">Rating</p>
+                                            <div className="flex gap-1">
+                                                {[1,2,3,4,5].map(i => (
+                                                    <button 
+                                                        key={i} 
+                                                        type="button"
+                                                        onClick={() => setRating(i)}
+                                                        className="transition-transform hover:scale-110"
+                                                    >
+                                                        <Star className={`h-8 w-8 ${i <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/30'}`} />
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="space-y-3">
+                                            <p className="text-sm font-medium">Your Feedback</p>
+                                            <Textarea 
+                                                placeholder="What was your experience using this API? Are the responses accurate and timely?"
+                                                className="rounded-2xl min-h-[120px] bg-background border-border/50 focus-visible:ring-primary/30"
+                                                value={comment}
+                                                onChange={(e) => setComment(e.target.value)}
+                                            />
+                                        </div>
+                                    </CardContent>
+                                    <CardFooter className="pt-0 flex justify-end">
+                                        <Button 
+                                            type="submit" 
+                                            className="rounded-xl px-8" 
+                                            disabled={reviewMutation.isPending}
+                                        >
+                                            {reviewMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                                            Submit Review
+                                        </Button>
+                                    </CardFooter>
+                                </form>
+                           </Card>
+                        ) : (
+                            <Card className="rounded-[2.5rem] border-dashed text-center p-8 bg-muted/20">
+                                <UserIcon className="h-10 w-10 text-muted-foreground mx-auto mb-4 opacity-30" />
+                                <h3 className="text-lg font-bold mb-2">Sign in to Review</h3>
+                                <p className="text-muted-foreground mb-6">You need to be logged in to share your experience with this API.</p>
+                                <Link href="/signin">
+                                    <Button className="rounded-xl">Connect Wallet / Sign In</Button>
+                                </Link>
+                            </Card>
+                        )}
+
+                        {/* Reviews List */}
+                        <div className="space-y-6">
+                            <h3 className="text-xl font-bold flex items-center gap-2">
+                                Community Reviews {stats?.totalCount ? <span className="text-muted-foreground text-sm font-normal">({stats.totalCount})</span> : null}
+                            </h3>
+                            
+                            {reviewsQuery.isLoading ? (
+                                [1,2,3].map(i => <div key={i} className="h-32 rounded-3xl bg-muted animate-pulse" />)
+                            ) : reviews.length === 0 ? (
+                                <div className="text-center py-20 bg-card/50 rounded-[2.5rem] border border-border/50">
+                                     <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-20" />
+                                     <p className="text-muted-foreground">No reviews yet. Be the first to review!</p>
+                                </div>
+                            ) : (
+                                <div className="grid gap-6">
+                                    {reviews.map((r) => (
+                                        <Card key={r.id} className="rounded-3xl border-border/50 bg-card group">
+                                            <CardHeader className="flex flex-row items-center gap-4 pb-4">
+                                                <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center overflow-hidden shrink-0">
+                                                    {r.reviewerImage ? (
+                                                        <img src={r.reviewerImage} alt={r.reviewerName || ""} />
+                                                    ) : (
+                                                        <UserIcon className="h-5 w-5 text-primary" />
+                                                    )}
+                                                </div>
+                                                <div className="flex-1">
+                                                    <div className="flex justify-between items-start">
+                                                        <p className="font-bold text-sm">{r.reviewerName || "Anonymous"}</p>
+                                                        <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">
+                                                            {new Date(r.createdAt).toLocaleDateString()}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex gap-0.5 mt-1">
+                                                        {[1,2,3,4,5].map(star => (
+                                                            <Star key={star} className={`h-3 w-3 ${star <= r.rating ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/20'}`} />
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <p className="text-sm text-foreground/80 leading-relaxed italic">
+                                                    "{r.comment}"
+                                                </p>
+                                            </CardContent>
+                                        </Card>
+                                    ))}
+                                </div>
+                            )}
                         </div>
-                    </CardContent>
-                </Card>
-
-                {/* Technical Integration */}
-                <Card className="rounded-[2.5rem] border-border/50 shadow-xl overflow-hidden bg-card/50 backdrop-blur-sm">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Code2 className="h-6 w-6 text-primary" /> Integration Guide
-                        </CardTitle>
-                        <CardDescription>Use the following sample to integrate this API into your application.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <Tabs defaultValue="curl" className="w-full">
-                            <TabsList className="grid w-full grid-cols-3 rounded-xl mb-4">
-                                <TabsTrigger value="curl" className="rounded-lg">cURL</TabsTrigger>
-                                <TabsTrigger value="js" className="rounded-lg">JavaScript</TabsTrigger>
-                                <TabsTrigger value="python" className="rounded-lg">Python</TabsTrigger>
-                            </TabsList>
-                            <TabsContent value="curl" className="relative group">
-                                <pre className="p-6 rounded-2xl bg-muted font-mono text-sm overflow-x-auto border border-border/50">
-                                    {curlExample}
-                                </pre>
-                                <Button 
-                                    size="icon" 
-                                    variant="ghost" 
-                                    className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"
-                                    onClick={() => copyToClipboard(curlExample)}
-                                >
-                                    {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                                </Button>
-                            </TabsContent>
-                            <TabsContent value="js">
-                                <pre className="p-6 rounded-2xl bg-muted font-mono text-sm overflow-x-auto border border-border/50 text-muted-foreground">
-                                    // SDK Implementation coming soon...
-                                </pre>
-                            </TabsContent>
-                            <TabsContent value="python">
-                                <pre className="p-6 rounded-2xl bg-muted font-mono text-sm overflow-x-auto border border-border/50 text-muted-foreground">
-                                    # Python implementation coming soon...
-                                </pre>
-                            </TabsContent>
-                        </Tabs>
-                    </CardContent>
-                </Card>
-
-                {/* Sample Response */}
-                {endpoint.sampleResponse && (
-                    <Card className="rounded-[2.5rem] border-border/50 shadow-xl overflow-hidden bg-card/50 backdrop-blur-sm">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-xl">
-                                <Database className="h-5 w-5 text-primary" /> Sample Data
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <pre className="p-6 rounded-2xl bg-zinc-950 text-zinc-300 font-mono text-xs overflow-x-auto shadow-inner border border-zinc-800">
-                                {endpoint.sampleResponse}
-                            </pre>
-                        </CardContent>
-                    </Card>
-                )}
+                    </TabsContent>
+                </Tabs>
             </div>
 
             {/* Sidebar / Checkout */}
             <div className="space-y-6">
-                <Card className="rounded-[2.5rem] border-primary/20 shadow-2xl overflow-hidden bg-background relative border-2">
+                <Card className="rounded-[2.5rem] border-primary/20 shadow-2xl overflow-hidden bg-background relative border-2 ring-4 ring-primary/5">
                     <div className="absolute top-0 right-0 p-4">
-                        <div className="bg-primary/10 text-primary text-[10px] font-black uppercase tracking-tighter px-2 py-0.5 rounded-full">Best Value</div>
+                        <div className="bg-primary/10 text-primary text-[10px] font-black uppercase tracking-tighter px-2 py-0.5 rounded-full">Developer Tier</div>
                     </div>
                     <CardHeader className="pt-10">
-                        <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Pricing Tier</CardTitle>
+                        <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Access Price</CardTitle>
                         <div className="mt-4 flex items-baseline gap-2">
                             <span className="text-5xl font-black tracking-tight">
                                 {formatUnits(endpoint.priceAmount, endpoint.tokenDecimals ?? 18)}
@@ -299,36 +488,42 @@ export default function EndpointDetailPage() {
                             </div>
                             <div className="flex items-center text-sm gap-2">
                                 <Check className="h-4 w-4 text-green-500 shrink-0" />
-                                <span>Basic Analytics Dashboard</span>
+                                <span>Pay-per-use, no recurring fees</span>
                             </div>
                          </div>
                          <Button className="w-full py-7 text-lg rounded-2xl shadow-lg shadow-primary/20 group font-bold" size="lg">
-                            Get Access Now
+                            Activate API
                             <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                          </Button>
                          <p className="text-[10px] text-center text-muted-foreground pt-2">
-                            By clicking, you will be redirected to the checkout flow on the {endpoint.chainName} network.
+                            Secure on-chain transaction on {endpoint.chainName}
                          </p>
                     </CardContent>
                 </Card>
 
                 <Card className="rounded-[2.5rem] border-border/50 bg-muted/20">
                     <CardHeader>
-                        <CardTitle className="text-lg">Network Info</CardTitle>
+                        <CardTitle className="text-lg">Deployment Metrics</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="flex justify-between items-center py-2 border-b border-border/50">
-                            <span className="text-sm text-muted-foreground">Blockchain</span>
-                            <span className="text-sm font-bold">{endpoint.chainName}</span>
+                            <span className="text-sm text-muted-foreground flex items-center gap-2">
+                                <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" /> Average Rating
+                            </span>
+                            <span className="text-sm font-bold">{stats?.averageRating.toFixed(1) || "0.0"} / 5.0</span>
                         </div>
                         <div className="flex justify-between items-center py-2 border-b border-border/50">
-                            <span className="text-sm text-muted-foreground">Currency</span>
-                            <span className="text-sm font-bold">{endpoint.tokenSymbol}</span>
+                            <span className="text-sm text-muted-foreground flex items-center gap-2">
+                                <MessageSquare className="h-4 w-4 text-blue-400" /> Total Reviews
+                            </span>
+                            <span className="text-sm font-bold">{stats?.totalCount || 0}</span>
                         </div>
-                        <Link href={`https://explorer.flow402.com/endpoint/${id}`} target="_blank" className="flex justify-between items-center py-2 group">
-                            <span className="text-sm text-muted-foreground">Verification</span>
-                            <span className="text-sm font-bold flex items-center gap-1 group-hover:text-primary transition-colors">
-                                View on Explorer <ExternalLink className="h-3 w-3" />
+                        <Link href={`#`} className="flex justify-between items-center py-2 group">
+                            <span className="text-sm text-muted-foreground flex items-center gap-2">
+                                <Shield className="h-4 w-4 text-green-400" /> Security Audit
+                            </span>
+                            <span className="text-sm font-bold flex items-center gap-1 group-hover:text-primary transition-colors text-green-600">
+                                Verified <Check className="h-3 w-3" />
                             </span>
                         </Link>
                     </CardContent>
