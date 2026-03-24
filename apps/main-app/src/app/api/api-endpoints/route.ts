@@ -15,8 +15,10 @@ import { auth } from "@/src/lib/auth";
 import { eq, and } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
-import { nanoid } from "nanoid";
+import { nanoid, customAlphabet } from "nanoid";
 import { withAuth } from "@/src/proxy";
+
+const generateGatewayPath = customAlphabet("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", 6);
 
 // Removed local getAuthUser async function
 
@@ -81,6 +83,22 @@ export const POST = withAuth(async (req: Request, user: any) => {
     const newId = uuidv4();
     const now = new Date();
 
+    // Check for unique gatewayPath if provided
+    if (body.gatewayPath) {
+      const existing = await db
+        .select({ id: apiEndpoints.id })
+        .from(apiEndpoints)
+        .where(eq(apiEndpoints.gatewayPath, body.gatewayPath))
+        .limit(1);
+      
+      if (existing.length > 0) {
+        return NextResponse.json(
+          { success: false, message: "Gateway path already exists. Please choose another one." },
+          { status: 409 }
+        );
+      }
+    }
+
     await db.transaction(async (tx) => {
       await tx.insert(apiEndpoints).values({
         id: newId,
@@ -93,7 +111,7 @@ export const POST = withAuth(async (req: Request, user: any) => {
         priceAmount: body.priceAmount,
         tokenId: body.tokenId,
         providerUrl: body.providerUrl,
-        gatewayPath: body.gatewayPath || `/${nanoid(10)}`,
+        gatewayPath: body.gatewayPath || `/${generateGatewayPath()}`,
         category: body.category || null,
         isActive: true,
         createdAt: now,

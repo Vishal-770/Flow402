@@ -77,7 +77,6 @@ export const PATCH = withAuth(async (req: Request, user: any, params: any) => {
           category: body.category,
           imageUrl: body.imageUrl,
           docsUrl: body.docsUrl,
-          gatewayPath: body.gatewayPath,
           providerUrl: body.providerUrl,
           updatedAt: now,
         })

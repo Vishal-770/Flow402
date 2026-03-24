@@ -598,7 +598,7 @@ export default function CreateApiEndpointPage() {
                         </span>
                         <Input
                             id="gatewayPath"
-                            placeholder="my-awesome-api"
+                            placeholder="e.g. ab12c3"
                             {...form.register("gatewayPath")}
                             className={`rounded-l-none ${errors.gatewayPath ? "border-destructive focus-visible:ring-destructive" : ""}`}
                             onChange={(e) => {
@@ -616,7 +616,7 @@ export default function CreateApiEndpointPage() {
                     </p>
                     )}
                     <p className="text-xs text-muted-foreground">
-                    The path where your API will be exposed on Flow402. Leave empty for auto-generated.
+                    A unique 6-digit alphanumeric code or your custom path. Leave empty for auto-generated.
                     </p>
                 </div>
 

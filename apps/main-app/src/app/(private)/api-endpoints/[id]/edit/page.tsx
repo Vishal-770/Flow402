@@ -352,6 +352,7 @@ export default function EditApiEndpointPage() {
                                             placeholder="/my-api-v1"
                                             {...form.register("gatewayPath")}
                                             className="rounded-2xl"
+                                            disabled // Gateway path is immutable after creation
                                         />
                                         {errors.gatewayPath && (
                                             <p className="text-xs text-destructive flex items-center gap-1">
