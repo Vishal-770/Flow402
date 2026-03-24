@@ -3,6 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
+import { ThirdwebModule } from './thirdweb/thirdweb.module';
+import { GatewayModule } from './gateway/gateway.module';
 
 @Module({
   imports: [
@@ -11,6 +13,8 @@ import { DatabaseModule } from './database/database.module';
       envFilePath: '.env', // default, optional
     }),
     DatabaseModule,
+    ThirdwebModule,
+    GatewayModule,
   ],
   controllers: [AppController],
   providers: [AppService],

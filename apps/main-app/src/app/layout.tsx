@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "../components/theme-provider";
 import { Toaster } from "@/src/components/ui/sonner";
-import PrivyProviderWrapper from "@/src/components/privy-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,6 +21,7 @@ export const metadata: Metadata = {
 
 import QueryProvider from "@/src/components/query-provider";
 import Navbar from "../components/Navbar";
+import ThirdwebProviderWrapper from "../components/thirdweb-provider";
 
 export default function RootLayout({
   children,
@@ -33,7 +33,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <PrivyProviderWrapper>
+        <ThirdwebProviderWrapper>
           <QueryProvider>
             <ThemeProvider
               attribute="class"
@@ -48,7 +48,7 @@ export default function RootLayout({
               <Toaster richColors position="top-center" />
             </ThemeProvider>
           </QueryProvider>
-        </PrivyProviderWrapper>
+        </ThirdwebProviderWrapper>
       </body>
     </html>
   );

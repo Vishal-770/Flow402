@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { authClient } from "@/src/lib/auth-client";
-import { useConnectWallet, useWallets } from "@privy-io/react-auth";
+import { ConnectButton, useActiveAccount } from "thirdweb/react";
+import { client } from "@/src/components/thirdweb-provider";
 import { Button } from "@/src/components/ui/button";
 import {
   Card,
@@ -73,18 +74,8 @@ const ProfilePage = () => {
   const [deleteWalletId, setDeleteWalletId] = useState<string | null>(null);
   const [deleteWalletAddress, setDeleteWalletAddress] = useState("");
 
-  // ─── Privy: connected wallets (wallets user gave permission to) ────────
-  const { wallets: privyWallets } = useWallets();
-
-  // ─── Privy: connect wallet (opens modal — MetaMask, WalletConnect etc.)
-  const { connectWallet } = useConnectWallet({
-    onSuccess: () => {
-      toast.success("Wallet connected! You can now link it to your account.");
-    },
-    onError: () => {
-      toast.error("Wallet connection was cancelled or failed");
-    },
-  });
+  // ─── Thirdweb: active account ──────────────────────────────────────────
+  const activeAccount = useActiveAccount();
 
   // ─── Fetch saved/linked wallets from DB ────────────────────────────────
   const walletsQuery = useQuery<WalletsApiResponse>({
@@ -330,32 +321,35 @@ const ProfilePage = () => {
                         your account.
                       </CardDescription>
                     </div>
-                    <Button onClick={() => connectWallet()} size="sm">
-                      <Wallet className="mr-2 h-4 w-4" />
-                      Connect Wallet
-                    </Button>
+                    <ConnectButton
+                      client={client}
+                      theme={"dark"}
+                      connectButton={{
+                        label: "Connect Wallet",
+                        className: "h-9 px-3 text-xs",
+                      }}
+                    />
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {/* ── Connected wallets from Privy (available to link) ── */}
-                  {privyWallets.length > 0 && (
+                  {/* ── Active wallet from Thirdweb (available to link) ── */}
+                  {activeAccount && (
                     <div>
                       <h3 className="text-sm font-medium text-foreground mb-3">
-                        Connected Wallets
+                        Active Wallet
                       </h3>
                       <p className="text-xs text-muted-foreground mb-3">
-                        These wallets are connected via your browser. Click
-                        &quot;Link&quot; to save one to your account. To add
-                        more wallets, click &quot;Connect Wallet&quot; again.
+                        This wallet is currently connected. Click
+                        &quot;Link&quot; to save it to your account.
                       </p>
                       <div className="space-y-2">
-                        {privyWallets.map((pw) => {
-                          const linked = isAddressLinked(pw.address);
-                          const isLinking = linkingAddress === pw.address;
+                        {(() => {
+                          const linked = isAddressLinked(activeAccount.address);
+                          const isLinking = linkingAddress === activeAccount.address;
 
                           return (
                             <div
-                              key={pw.address}
+                              key={activeAccount.address}
                               className="flex items-center justify-between gap-4 rounded-lg border border-border bg-muted/20 p-3"
                             >
                               <div className="min-w-0 flex-1">
@@ -367,11 +361,11 @@ const ProfilePage = () => {
                                     Ethereum
                                   </Badge>
                                   <Badge variant="outline" className="text-xs">
-                                    {pw.walletClientType}
+                                    Active
                                   </Badge>
                                 </div>
                                 <p className="font-mono text-sm text-foreground truncate">
-                                  {pw.address}
+                                  {activeAccount.address}
                                 </p>
                               </div>
                               <div className="flex gap-2 shrink-0">
@@ -379,10 +373,10 @@ const ProfilePage = () => {
                                   variant="outline"
                                   size="sm"
                                   onClick={() =>
-                                    handleCopyAddress(pw.address)
+                                    handleCopyAddress(activeAccount.address)
                                   }
                                 >
-                                  {copiedAddress === pw.address ? (
+                                  {copiedAddress === activeAccount.address ? (
                                     <Check className="h-4 w-4 text-green-500" />
                                   ) : (
                                     <Copy className="h-4 w-4" />
@@ -402,7 +396,7 @@ const ProfilePage = () => {
                                   <Button
                                     size="sm"
                                     onClick={() =>
-                                      handleLinkWallet(pw.address)
+                                      handleLinkWallet(activeAccount.address)
                                     }
                                     disabled={isLinking}
                                   >
@@ -414,28 +408,16 @@ const ProfilePage = () => {
                                     {isLinking ? "Linking..." : "Link"}
                                   </Button>
                                 )}
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => {
-                                    pw.disconnect();
-                                    toast.info("Wallet disconnected");
-                                  }}
-                                  className="text-muted-foreground hover:text-destructive"
-                                  title="Disconnect wallet"
-                                >
-                                  <Unplug className="h-4 w-4" />
-                                </Button>
                               </div>
                             </div>
                           );
-                        })}
+                        })()}
                       </div>
                     </div>
                   )}
 
                   {/* ── Divider if both sections present ── */}
-                  {privyWallets.length > 0 && savedWallets.length > 0 && (
+                  {activeAccount && savedWallets.length > 0 && (
                     <Separator />
                   )}
 
@@ -517,10 +499,10 @@ const ProfilePage = () => {
                   </div>
 
                   {/* ── Empty state when no wallets connected at all ── */}
-                  {privyWallets.length === 0 && savedWallets.length === 0 && (
+                  {!activeAccount && savedWallets.length === 0 && (
                     <div className="text-center py-4 text-muted-foreground">
                       <p className="text-sm">
-                        Click &quot;Connect Wallet&quot; to get started.
+                        Use the &quot;Connect Wallet&quot; button above.
                       </p>
                     </div>
                   )}
