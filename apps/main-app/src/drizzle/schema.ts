@@ -149,7 +149,9 @@ export const apiTags = pgTable(
   "api_tags",
   {
     id: text("id").primaryKey(),
-    apiEndpointId: text("api_endpoint_id").notNull(),
+    apiEndpointId: text("api_endpoint_id")
+      .notNull()
+      .references(() => apiEndpoints.id, { onDelete: "cascade" }),
     tag: text("tag").notNull(),
     createdAt: timestamp("created_at").notNull(),
   },
@@ -164,7 +166,9 @@ export const apiQueryParams = pgTable(
   "api_query_params",
   {
     id: text("id").primaryKey(),
-    apiEndpointId: text("api_endpoint_id").notNull(),
+    apiEndpointId: text("api_endpoint_id")
+      .notNull()
+      .references(() => apiEndpoints.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     type: text("type").notNull(),
     required: boolean("required").notNull().default(false),
@@ -182,7 +186,9 @@ export const apiRequestBodies = pgTable(
   "api_request_bodies",
   {
     id: text("id").primaryKey(),
-    apiEndpointId: text("api_endpoint_id").notNull(),
+    apiEndpointId: text("api_endpoint_id")
+      .notNull()
+      .references(() => apiEndpoints.id, { onDelete: "cascade" }),
     fieldName: text("field_name").notNull(),
     fieldType: text("field_type").notNull(),
     required: boolean("required").notNull().default(false),
@@ -201,7 +207,9 @@ export const apiCalls = pgTable(
   "api_calls",
   {
     id: text("id").primaryKey(),
-    apiEndpointId: text("api_endpoint_id").notNull(),
+    apiEndpointId: text("api_endpoint_id")
+      .notNull()
+      .references(() => apiEndpoints.id, { onDelete: "cascade" }),
     callerWallet: text("caller_wallet").notNull(),
     priceAmount: text("price_amount").notNull(),
     status: apiCallStatus("status").notNull(),
@@ -222,7 +230,9 @@ export const apiReviews = pgTable(
   "api_reviews",
   {
     id: text("id").primaryKey(),
-    apiEndpointId: text("api_endpoint_id").notNull(),
+    apiEndpointId: text("api_endpoint_id")
+      .notNull()
+      .references(() => apiEndpoints.id, { onDelete: "cascade" }),
     reviewerId: text("reviewer_id").notNull(),
     rating: integer("rating").notNull(),
     comment: text("comment"),
@@ -241,7 +251,9 @@ export const apiUpstreamHeaders = pgTable(
   "api_upstream_headers",
   {
     id: text("id").primaryKey(),
-    apiEndpointId: text("api_endpoint_id").notNull(),
+    apiEndpointId: text("api_endpoint_id")
+      .notNull()
+      .references(() => apiEndpoints.id, { onDelete: "cascade" }),
     headerName: text("header_name").notNull(),
     headerValue: text("header_value").notNull(),
     createdAt: timestamp("created_at").notNull(),
@@ -257,7 +269,9 @@ export const favorites = pgTable(
   {
     id: text("id").primaryKey(),
     userId: text("user_id").notNull(),
-    apiEndpointId: text("api_endpoint_id").notNull(),
+    apiEndpointId: text("api_endpoint_id")
+      .notNull()
+      .references(() => apiEndpoints.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at").notNull(),
     updatedAt: timestamp("updated_at").notNull(),
   },

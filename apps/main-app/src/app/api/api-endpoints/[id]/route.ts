@@ -2,38 +2,19 @@ import { NextResponse } from "next/server";
 import { db } from "@/src/drizzle/db";
 import {
   apiEndpoints,
-  tokens,
-  chains,
-  wallets,
   apiUpstreamHeaders,
   apiQueryParams,
   apiRequestBodies,
   apiTags,
 } from "@/src/drizzle/schema";
-import { auth } from "@/src/lib/auth";
 import { eq, and } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
-import { headers } from "next/headers";
+import { withAuth } from "@/src/proxy";
 import { createApiEndpointSchema } from "@/src/lib/validators/api-endpoint";
 import { z } from "zod";
 
-async function getAuthUser() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-  return session?.user ?? null;
-}
-
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export const GET = withAuth(async (req: Request, user: any, params: any) => {
   try {
-    const user = await getAuthUser();
-    if (!user) {
-      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
-    }
-
     const { id } = await params;
 
     const endpoint = await db.query.apiEndpoints.findFirst({
@@ -64,18 +45,10 @@ export async function GET(
     console.error("Error fetching api endpoint:", error);
     return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
   }
-}
+});
 
-export async function PATCH(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export const PATCH = withAuth(async (req: Request, user: any, params: any) => {
   try {
-    const user = await getAuthUser();
-    if (!user) {
-      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
-    }
-
     const { id } = await params;
     const json: unknown = await req.json();
     
@@ -190,4 +163,28 @@ export async function PATCH(
     console.error("Error updating api endpoint:", error);
     return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
   }
-}
+});
+
+export const DELETE = withAuth(async (req: Request, user: any, params: any) => {
+  try {
+    const { id } = await params;
+
+    // Verify ownership and delete
+    const result = await db
+      .delete(apiEndpoints)
+      .where(and(eq(apiEndpoints.id, id), eq(apiEndpoints.providerId, user.id)))
+      .returning({ id: apiEndpoints.id });
+
+    if (result.length === 0) {
+      return NextResponse.json(
+        { success: false, message: "Endpoint not found or not owned by you" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ success: true, message: "Endpoint deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting api endpoint:", error);
+    return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
+  }
+});

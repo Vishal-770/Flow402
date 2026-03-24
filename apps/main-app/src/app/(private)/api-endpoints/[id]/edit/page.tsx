@@ -147,13 +147,22 @@ export default function EditApiEndpointPage() {
   const watchedImageUrl = watch("imageUrl");
 
   // ─── Data queries ──────────────────────────────────────────────────────
-  const { data: endpointData, isLoading: isLoadingEndpoint } = useQuery({
+  const { data: endpointData, isLoading: isLoadingEndpoint, error: fetchError } = useQuery({
     queryKey: ["api-endpoint", id],
     queryFn: async () => {
       const res = await axios.get(`/api/api-endpoints/${id}`);
       return res.data.data;
     },
+    retry: false, // Don't retry if it fails (likely 401/403/404)
   });
+
+  // Handle unauthorized or missing data
+  useEffect(() => {
+    if (fetchError) {
+      toast.error("You don't have permission to edit this endpoint or it doesn't exist.");
+      router.push("/dashboard");
+    }
+  }, [fetchError, router]);
 
   // Pre-populate form when data arrives
   useEffect(() => {

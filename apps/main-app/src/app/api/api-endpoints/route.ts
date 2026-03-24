@@ -16,25 +16,12 @@ import { eq, and } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import { nanoid } from "nanoid";
-import { headers } from "next/headers";
+import { withAuth } from "@/src/proxy";
 
-async function getAuthUser() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-  return session?.user ?? null;
-}
+// Removed local getAuthUser async function
 
-export async function GET() {
+export const GET = withAuth(async (req: Request, user: any) => {
   try {
-    const user = await getAuthUser();
-    if (!user) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
     const endpoints = await db
       .select({
         id: apiEndpoints.id,
@@ -70,18 +57,10 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
+});
 
-export async function POST(req: Request) {
+export const POST = withAuth(async (req: Request, user: any) => {
   try {
-    const user = await getAuthUser();
-    if (!user) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
     const json: unknown = await req.json();
     const body = createApiEndpointSchema.parse(json);
 
@@ -194,4 +173,4 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
-}
+});
