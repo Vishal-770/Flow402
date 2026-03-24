@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { Input } from "@/src/components/ui/input";
 import { Button } from "@/src/components/ui/button";
@@ -22,10 +22,15 @@ import {
   Globe,
   Coins,
   Shield,
-  Zap
+  Zap,
+  Code2,
+  Heart,
+  Star
 } from "lucide-react";
 import { formatUnits } from "@/src/lib/utils/units";
 import Link from "next/link";
+import { authClient } from "@/src/lib/auth-client";
+import { toast } from "sonner";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -65,6 +70,8 @@ const CATEGORIES = [
 export default function MarketplacePage() {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const queryClient = useQueryClient();
+  const { data: session } = authClient.useSession();
 
   const marketplaceQuery = useQuery<{ success: boolean; data: MarketplaceEndpoint[] }>({
     queryKey: ["marketplace"],
@@ -74,7 +81,31 @@ export default function MarketplacePage() {
     },
   });
 
+  const favoritesQuery = useQuery<{ success: boolean; data: string[] }>({
+    queryKey: ["user-favorites"],
+    queryFn: async () => {
+      const res = await axios.get("/api/marketplace/favorites");
+      return res.data;
+    },
+    enabled: !!session,
+  });
+
+  const toggleFavoriteMutation = useMutation({
+    mutationFn: async (apiEndpointId: string) => {
+      const res = await axios.post("/api/marketplace/favorites", { apiEndpointId });
+      return res.data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["user-favorites"] });
+      toast.success(data.action === "added" ? "Added to favorites" : "Removed from favorites");
+    },
+    onError: () => {
+      toast.error("Failed to update favorites");
+    },
+  });
+
   const allEndpoints = marketplaceQuery.data?.data ?? [];
+  const favorites = favoritesQuery.data?.data ?? [];
 
   const filteredEndpoints = allEndpoints.filter((ep) => {
     const matchesSearch = 
@@ -180,7 +211,18 @@ export default function MarketplacePage() {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredEndpoints.map((ep) => (
-                        <ApiCard key={ep.id} ep={ep} />
+                        <ApiCard 
+                          key={ep.id} 
+                          ep={ep} 
+                          isFavorite={favorites.includes(ep.id)}
+                          onToggleFavorite={() => {
+                            if (!session) {
+                              toast.error("Please sign in to favorite APIs");
+                              return;
+                            }
+                            toggleFavoriteMutation.mutate(ep.id);
+                          }}
+                        />
                     ))}
                 </div>
             )}
@@ -191,7 +233,15 @@ export default function MarketplacePage() {
   );
 }
 
-function ApiCard({ ep }: { ep: MarketplaceEndpoint }) {
+function ApiCard({ 
+  ep, 
+  isFavorite, 
+  onToggleFavorite 
+}: { 
+  ep: MarketplaceEndpoint; 
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
+}) {
     return (
         <Card className="group overflow-hidden rounded-[2rem] border-border/50 hover:border-primary/30 transition-all hover:shadow-2xl hover:shadow-primary/5 bg-card hover:-translate-y-1">
             <CardHeader className="p-0 relative h-40 overflow-hidden bg-muted/20">
@@ -206,11 +256,28 @@ function ApiCard({ ep }: { ep: MarketplaceEndpoint }) {
                         <Code2 className="h-12 w-12 text-primary/20" />
                     </div>
                 )}
-                {ep.category && (
-                    <Badge className="absolute top-4 right-4 bg-background/80 backdrop-blur-sm text-foreground border-none shadow-lg">
-                        {ep.category}
-                    </Badge>
-                )}
+                
+                <div className="absolute top-4 right-4 flex gap-2">
+                    <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onToggleFavorite();
+                        }}
+                        className={`p-2 rounded-xl backdrop-blur-md border shadow-sm transition-all hover:scale-110 ${
+                          isFavorite
+                            ? "bg-red-500/10 border-red-500/20 text-red-500"
+                            : "bg-background/50 border-white/10 text-muted-foreground hover:text-red-500"
+                        }`}
+                    >
+                        <Heart className={`h-4 w-4 ${isFavorite ? "fill-current" : ""}`} />
+                    </button>
+                    {ep.category && (
+                        <Badge className="bg-background/80 backdrop-blur-sm text-foreground border-none shadow-lg">
+                            {ep.category}
+                        </Badge>
+                    )}
+                </div>
             </CardHeader>
             <CardContent className="p-6">
                 <div className="flex items-center gap-2 mb-3">
@@ -266,20 +333,3 @@ function ApiCard({ ep }: { ep: MarketplaceEndpoint }) {
         </Card>
     );
 }
-
-const Code2 = ({ className }: { className?: string }) => (
-    <svg 
-        className={className}
-        xmlns="http://www.w3.org/2000/svg" 
-        width="24" height="24" 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        stroke="currentColor" 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round"
-    >
-        <polyline points="16 18 22 12 16 6"></polyline>
-        <polyline points="8 6 2 12 8 18"></polyline>
-    </svg>
-)

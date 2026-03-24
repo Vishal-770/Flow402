@@ -40,6 +40,10 @@ import {
   Star,
   MessageSquare,
   User as UserIcon,
+  Heart,
+  List,
+  FileJson,
+  Search,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -58,6 +62,27 @@ interface Review {
 interface ReviewStats {
   averageRating: number;
   totalCount: number;
+}
+
+interface RequestBodyField {
+  fieldName: string;
+  fieldType: string;
+  required: boolean;
+  description: string | null;
+  exampleValue: string | null;
+}
+
+interface QueryParam {
+  name: string;
+  type: string;
+  required: boolean;
+  description: string | null;
+  defaultValue: string | null;
+}
+
+interface UpstreamHeader {
+  headerName: string;
+  headerValue: string;
 }
 
 interface MarketplaceEndpointDetail {
@@ -80,6 +105,9 @@ interface MarketplaceEndpointDetail {
   chainId: string | null;
   providerName: string | null;
   providerImage: string | null;
+  upstreamHeaders?: UpstreamHeader[];
+  queryParams?: QueryParam[];
+  requestBody?: RequestBodyField[];
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -133,6 +161,31 @@ export default function EndpointDetailPage() {
   const reviews = reviewsQuery.data?.data ?? [];
   const stats = reviewsQuery.data?.stats;
 
+  const favoritesQuery = useQuery<{ success: boolean; data: string[] }>({
+    queryKey: ["user-favorites"],
+    queryFn: async () => {
+      const res = await axios.get("/api/marketplace/favorites");
+      return res.data;
+    },
+    enabled: !!session,
+  });
+
+  const toggleFavoriteMutation = useMutation({
+    mutationFn: async (apiEndpointId: string) => {
+      const res = await axios.post("/api/marketplace/favorites", { apiEndpointId });
+      return res.data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["user-favorites"] });
+      toast.success(data.action === "added" ? "Added to favorites" : "Removed from favorites");
+    },
+    onError: () => {
+      toast.error("Failed to update favorites");
+    },
+  });
+
+  const isFavorite = favoritesQuery.data?.data?.includes(id as string) ?? false;
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     setCopied(true);
@@ -151,6 +204,14 @@ export default function EndpointDetailPage() {
         return;
     }
     reviewMutation.mutate({ rating, comment });
+  };
+
+  const handleToggleFavorite = () => {
+    if (!session) {
+      toast.error("Please sign in to favorite APIs");
+      return;
+    }
+    toggleFavoriteMutation.mutate(id as string);
   };
 
   if (detailQuery.isLoading) {
@@ -224,9 +285,22 @@ export default function EndpointDetailPage() {
                         {stats?.averageRating.toFixed(1) || "0.0"} ({stats?.totalCount || 0})
                     </div>
                 </div>
-                <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
-                    {endpoint.description || "Unnamed API Endpoint"}
-                </h1>
+                <div className="flex items-center justify-between gap-4 mb-4">
+                    <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+                        {endpoint.description || "Unnamed API Endpoint"}
+                    </h1>
+                    <button
+                        onClick={handleToggleFavorite}
+                        className={`p-3 rounded-2xl backdrop-blur-md border shadow-lg transition-all hover:scale-110 shrink-0 ${
+                          isFavorite
+                            ? "bg-red-500/10 border-red-500/20 text-red-500"
+                            : "bg-background/50 border-border/50 text-muted-foreground hover:text-red-500"
+                        }`}
+                        title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                    >
+                        <Heart className={`h-6 w-6 ${isFavorite ? "fill-current" : ""}`} />
+                    </button>
+                </div>
                 <div className="flex items-center gap-3 text-muted-foreground">
                     <div className="flex items-center gap-2">
                         <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary border border-primary/20">
@@ -256,6 +330,7 @@ export default function EndpointDetailPage() {
                     <TabsList className="bg-background/50 backdrop-blur-md border border-border/50 p-1 rounded-2xl h-14 mb-8">
                         <TabsTrigger value="overview" className="rounded-xl px-8 h-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Overview</TabsTrigger>
                         <TabsTrigger value="integration" className="rounded-xl px-8 h-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Integration</TabsTrigger>
+                        <TabsTrigger value="specs" className="rounded-xl px-8 h-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Technical Specs</TabsTrigger>
                         <TabsTrigger value="reviews" className="rounded-xl px-8 h-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all flex items-center gap-2">
                             Reviews <Badge variant="secondary" className="px-1.5 py-0 h-4 min-w-[16px] flex items-center justify-center">{stats?.totalCount || 0}</Badge>
                         </TabsTrigger>
@@ -302,6 +377,124 @@ export default function EndpointDetailPage() {
                                 </CardContent>
                             </Card>
                         )}
+                    </TabsContent>
+
+                    <TabsContent value="specs" className="space-y-8 mt-0 outline-none">
+                        {/* Headers */}
+                        <Card className="rounded-[2.5rem] border-border/50 shadow-xl overflow-hidden bg-card/50 backdrop-blur-sm">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-xl font-bold">
+                                    <List className="h-5 w-5 text-primary" /> Upstream Headers
+                                </CardTitle>
+                                <CardDescription>These headers are sent by the gateway to the provider.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                {endpoint.upstreamHeaders && endpoint.upstreamHeaders.length > 0 ? (
+                                    <div className="rounded-2xl border border-border/50 overflow-hidden shadow-inner">
+                                        <table className="w-full text-sm">
+                                            <thead className="bg-muted/50 border-b border-border/50">
+                                                <tr>
+                                                    <th className="px-4 py-3 text-left font-black tracking-widest uppercase text-[10px]">Name</th>
+                                                    <th className="px-4 py-3 text-left font-black tracking-widest uppercase text-[10px]">Value</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-border/50">
+                                                {endpoint.upstreamHeaders.map((h, i) => (
+                                                    <tr key={i} className="hover:bg-primary/5 transition-colors">
+                                                        <td className="px-4 py-3 font-mono text-primary text-xs uppercase tracking-tight">{h.headerName}</td>
+                                                        <td className="px-4 py-3 text-muted-foreground truncate max-w-[200px] font-medium">{h.headerValue}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                ) : (
+                                    <div className="p-8 text-center rounded-2xl border border-dashed text-muted-foreground opacity-50 font-bold">
+                                        No upstream headers defined
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+
+                        {/* Query Params */}
+                        <Card className="rounded-[2.5rem] border-border/50 shadow-xl overflow-hidden bg-card/50 backdrop-blur-sm">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-xl font-bold">
+                                    <Search className="h-5 w-5 text-primary" /> Query Parameters
+                                </CardTitle>
+                                <CardDescription>Supported dynamic parameters for this API.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                {endpoint.queryParams && endpoint.queryParams.length > 0 ? (
+                                    <div className="rounded-2xl border border-border/50 overflow-hidden shadow-inner">
+                                        <table className="w-full text-sm">
+                                            <thead className="bg-muted/50 border-b border-border/50">
+                                                <tr>
+                                                    <th className="px-4 py-3 text-left font-black tracking-widest uppercase text-[10px]">Name</th>
+                                                    <th className="px-4 py-3 text-left font-black tracking-widest uppercase text-[10px]">Type</th>
+                                                    <th className="px-4 py-3 text-left font-black tracking-widest uppercase text-[10px]">Required</th>
+                                                    <th className="px-4 py-3 text-left font-black tracking-widest uppercase text-[10px]">Default</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-border/50">
+                                                {endpoint.queryParams.map((p, i) => (
+                                                    <tr key={i} className="hover:bg-primary/5 transition-colors font-medium">
+                                                        <td className="px-4 py-3 font-mono text-primary font-bold">{p.name}</td>
+                                                        <td className="px-4 py-3"><Badge variant="outline" className="text-[10px] font-bold uppercase">{p.type}</Badge></td>
+                                                        <td className="px-4 py-3">{p.required ? <Badge className="bg-red-500/10 text-red-500 border-red-500/20 uppercase text-[10px] font-black">Yes</Badge> : <span className="text-muted-foreground text-xs font-bold uppercase opacity-50">No</span>}</td>
+                                                        <td className="px-4 py-3 font-mono text-[10px] text-muted-foreground">{p.defaultValue || "-"}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                ) : (
+                                    <div className="p-8 text-center rounded-2xl border border-dashed text-muted-foreground opacity-50 font-bold">
+                                        No query parameters defined
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+
+                        {/* Request Body */}
+                        <Card className="rounded-[2.5rem] border-border/50 shadow-xl overflow-hidden bg-card/50 backdrop-blur-sm">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-xl font-bold">
+                                    <FileJson className="h-5 w-5 text-primary" /> Request Body Fields
+                                </CardTitle>
+                                <CardDescription>Fields that should be included in the JSON request body.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                {endpoint.requestBody && endpoint.requestBody.length > 0 ? (
+                                    <div className="rounded-2xl border border-border/50 overflow-hidden shadow-inner font-bold">
+                                        <table className="w-full text-sm">
+                                            <thead className="bg-muted/50 border-b border-border/50">
+                                                <tr>
+                                                    <th className="px-4 py-3 text-left font-black tracking-widest uppercase text-[10px]">Field</th>
+                                                    <th className="px-4 py-3 text-left font-black tracking-widest uppercase text-[10px]">Type</th>
+                                                    <th className="px-4 py-3 text-left font-black tracking-widest uppercase text-[10px]">Required</th>
+                                                    <th className="px-4 py-3 text-left font-black tracking-widest uppercase text-[10px]">Example</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-border/50">
+                                                {endpoint.requestBody.map((b, i) => (
+                                                    <tr key={i} className="hover:bg-primary/5 transition-colors font-medium">
+                                                        <td className="px-4 py-3 font-mono text-primary font-bold">{b.fieldName}</td>
+                                                        <td className="px-4 py-3"><Badge variant="outline" className="text-[10px] font-bold uppercase">{b.fieldType}</Badge></td>
+                                                        <td className="px-4 py-3">{b.required ? <Badge className="bg-red-500/10 text-red-500 border-red-500/20 uppercase text-[10px] font-black">Yes</Badge> : <span className="text-muted-foreground text-xs uppercase opacity-50 font-bold">No</span>}</td>
+                                                        <td className="px-4 py-3 font-mono text-[10px] text-muted-foreground truncate max-w-[150px]">{b.exampleValue || "-"}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                ) : (
+                                    <div className="p-8 text-center rounded-2xl border border-dashed text-muted-foreground opacity-50 font-bold">
+                                        No request body fields defined
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
                     </TabsContent>
 
                     <TabsContent value="integration" className="mt-0 outline-none">

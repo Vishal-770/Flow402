@@ -5,6 +5,9 @@ import {
   tokens,
   chains,
   user,
+  apiUpstreamHeaders,
+  apiQueryParams,
+  apiRequestBodies,
 } from "@/src/drizzle/schema";
 import { eq, and } from "drizzle-orm";
 
@@ -52,7 +55,49 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({ success: true, data: endpoint[0] });
+    const [
+      upstreamHeaders,
+      queryParams,
+      requestBody,
+    ] = await Promise.all([
+      db
+        .select({
+          headerName: apiUpstreamHeaders.headerName,
+          headerValue: apiUpstreamHeaders.headerValue,
+        })
+        .from(apiUpstreamHeaders)
+        .where(eq(apiUpstreamHeaders.apiEndpointId, id)),
+      db
+        .select({
+          name: apiQueryParams.name,
+          type: apiQueryParams.type,
+          required: apiQueryParams.required,
+          description: apiQueryParams.description,
+          defaultValue: apiQueryParams.defaultValue,
+        })
+        .from(apiQueryParams)
+        .where(eq(apiQueryParams.apiEndpointId, id)),
+      db
+        .select({
+          fieldName: apiRequestBodies.fieldName,
+          fieldType: apiRequestBodies.fieldType,
+          required: apiRequestBodies.required,
+          description: apiRequestBodies.description,
+          exampleValue: apiRequestBodies.exampleValue,
+        })
+        .from(apiRequestBodies)
+        .where(eq(apiRequestBodies.apiEndpointId, id)),
+    ]);
+
+    return NextResponse.json({ 
+      success: true, 
+      data: {
+        ...endpoint[0],
+        upstreamHeaders,
+        queryParams,
+        requestBody,
+      } 
+    });
   } catch (error) {
     console.error("Error fetching marketplace endpoint detail:", error);
     return NextResponse.json(
