@@ -41,6 +41,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { EditApiEndpointDialog } from "@/src/components/api-endpoints/edit-dialog";
+import { formatUnits } from "@/src/lib/utils/units";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -139,9 +140,9 @@ export default function ApiEndpointsPage() {
           </Button>
         </Link>
         <div className="flex-1">
-          <h1 className="text-3xl font-bold text-foreground">My API Endpoints</h1>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">My API Listings</h1>
           <p className="text-muted-foreground mt-1">
-            Manage your registered APIs on the marketplace
+            Manage and monitor your endpoints registered on the marketplace
           </p>
         </div>
         <Link href="/api-endpoints/create">
@@ -203,7 +204,9 @@ export default function ApiEndpointsPage() {
                       </TableCell>
                       <TableCell>
                         <div className="text-sm">
-                          <span className="font-mono">{ep.priceAmount}</span>
+                          <span className="font-mono">
+                            {formatUnits(ep.priceAmount, ep.tokenDecimals ?? 18)}
+                          </span>
                           <span className="text-xs text-muted-foreground ml-1">
                             {ep.tokenSymbol ?? ""}
                           </span>

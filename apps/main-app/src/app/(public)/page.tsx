@@ -43,7 +43,7 @@ const LandingPage = () => {
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
-            <Link href="/dashboard">
+            <Link href="/marketplace">
               <Button size="lg" variant="outline" className="px-8 py-6 text-lg rounded-xl border-2">
                 Explore Marketplace
               </Button>

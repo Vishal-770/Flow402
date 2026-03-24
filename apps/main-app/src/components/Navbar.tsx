@@ -38,10 +38,9 @@ const Navbar = () => {
 
   const navLinks = [
     { name: "Home", href: "/" },
+    { name: "Marketplace", href: "/marketplace" },
+    { name: "My APIs", href: "/api-endpoints" },
     { name: "Dashboard", href: "/dashboard" },
-    { name: "API Endpoints", href: "/api-endpoints" },
-    { name: "Chains", href: "/chains" },
-    { name: "Tokens", href: "/tokens" },
   ];
 
   return (

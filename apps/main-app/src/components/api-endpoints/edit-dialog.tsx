@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { parseUnits, formatUnits } from "@/src/lib/utils/units";
 import {
   updateApiEndpointSchema,
   UpdateApiEndpointInput,
@@ -62,6 +63,7 @@ const CATEGORIES = [
 interface TokenRow {
   id: string;
   symbol: string;
+  decimals: number;
 }
 
 interface WalletRow {
@@ -155,7 +157,10 @@ export function EditApiEndpointDialog({ id, open, onOpenChange }: EditDialogProp
         gatewayPath: endpointData.gatewayPath,
         sampleResponse: endpointData.sampleResponse ?? "",
         tokenId: endpointData.tokenId,
-        priceAmount: endpointData.priceAmount,
+        priceAmount: (() => {
+            const token = tokensList.find(t => t.id === endpointData.tokenId);
+            return token ? formatUnits(endpointData.priceAmount, token.decimals) : endpointData.priceAmount;
+        })(),
         walletId: endpointData.walletId,
         isActive: endpointData.isActive,
         upstreamHeaders: endpointData.upstreamHeaders ?? [],
@@ -269,7 +274,18 @@ export function EditApiEndpointDialog({ id, open, onOpenChange }: EditDialogProp
   });
 
   const onSubmit = (data: UpdateApiEndpointInput) => {
-    updateMutation.mutate(data);
+    // Convert price to atomic units if token is found
+    const token = tokensList.find(t => t.id === data.tokenId);
+    let finalData = { ...data };
+    if (token && data.priceAmount) {
+        try {
+            finalData.priceAmount = parseUnits(data.priceAmount, token.decimals).toString();
+        } catch (e) {
+            toast.error("Invalid price format");
+            return;
+        }
+    }
+    updateMutation.mutate(finalData);
   };
 
   // ─── Render ────────────────────────────────────────────────────────────

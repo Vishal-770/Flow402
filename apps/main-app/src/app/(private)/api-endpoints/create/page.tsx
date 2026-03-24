@@ -12,6 +12,7 @@ import {
   CreateApiEndpointInput,
 } from "@/src/lib/validators/api-endpoint";
 import { uploadImage } from "@/src/lib/upload";
+import { parseUnits } from "@/src/lib/utils/units";
 import { z } from "zod";
 
 import { Button } from "@/src/components/ui/button";
@@ -1126,21 +1127,4 @@ export default function CreateApiEndpointPage() {
       </div>
     </div>
   );
-}
-
-// ─── Helpers ───────────────────────────────────────────────────────────────
-function parseUnits(value: string, decimals: number): bigint {
-    if (!value) return BigInt(0);
-    // Remove commas
-    let [integer, fraction = ""] = value.replace(/,/g, "").split(".");
-    
-    // Truncate fraction to decimals
-    if (fraction.length > decimals) {
-        fraction = fraction.slice(0, decimals);
-    }
-    
-    // Pad fraction
-    fraction = fraction.padEnd(decimals, "0");
-    
-    return BigInt(integer + fraction);
 }

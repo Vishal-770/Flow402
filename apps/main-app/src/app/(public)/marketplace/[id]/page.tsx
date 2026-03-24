@@ -1,0 +1,341 @@
+"use client";
+
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import { useParams, useRouter } from "next/navigation";
+import { formatUnits } from "@/src/lib/utils/units";
+import { Button } from "@/src/components/ui/button";
+import { Badge } from "@/src/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/src/components/ui/card";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/src/components/ui/tabs";
+import {
+  ChevronLeft,
+  Loader2,
+  Globe,
+  Code2,
+  Zap,
+  Shield,
+  Copy,
+  Check,
+  ExternalLink,
+  ArrowRight,
+  Clock,
+  Database
+} from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
+import { toast } from "sonner";
+
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+interface MarketplaceEndpointDetail {
+  id: string;
+  description: string | null;
+  docsUrl: string | null;
+  imageUrl: string | null;
+  sampleResponse: string | null;
+  priceAmount: string;
+  tokenId: string;
+  providerUrl: string | null;
+  gatewayPath: string | null;
+  category: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  tokenSymbol: string | null;
+  tokenDecimals: number | null;
+  chainName: string | null;
+  chainId: string | null;
+  providerName: string | null;
+  providerImage: string | null;
+}
+
+// ─── Component ───────────────────────────────────────────────────────────────
+
+export default function EndpointDetailPage() {
+  const { id } = useParams();
+  const router = useRouter();
+  const [copied, setCopied] = useState(false);
+
+  const detailQuery = useQuery<{ success: boolean; data: MarketplaceEndpointDetail }>({
+    queryKey: ["marketplace-detail", id],
+    queryFn: async () => {
+      const res = await axios.get(`/api/marketplace/${id}`);
+      return res.data;
+    },
+    enabled: !!id,
+  });
+
+  const endpoint = detailQuery.data?.data;
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    toast.success("Copied to clipboard");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  if (detailQuery.isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground animate-pulse">Loading API details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (detailQuery.isError || !endpoint) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <Card className="max-w-md w-full text-center p-8 rounded-[2rem] border-dashed">
+          <Globe className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-20" />
+          <h2 className="text-2xl font-bold mb-2">API Not Found</h2>
+          <p className="text-muted-foreground mb-6">The endpoint you are looking for might have been de-listed or doesn't exist.</p>
+          <Button onClick={() => router.push("/marketplace")} variant="outline" className="rounded-xl">
+            Back to Marketplace
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
+  const curlExample = `curl -X POST "https://gateway.flow402.com${endpoint.gatewayPath}" \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: YOUR_API_KEY" \\
+  -d '{"query": "example"}'`;
+
+  return (
+    <div className="min-h-screen bg-background pb-20">
+      {/* Hero Section */}
+      <div className="relative bg-muted/30 pt-12 pb-24 px-6 overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10">
+            <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/10 blur-[120px] rounded-full" />
+            <div className="absolute bottom-[-10%] left-[-10%] w-[30%] h-[30%] bg-blue-500/5 blur-[100px] rounded-full" />
+        </div>
+
+        <div className="max-w-7xl mx-auto">
+          <Link 
+            href="/marketplace" 
+            className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-primary mb-8 transition-colors group"
+          >
+            <ChevronLeft className="mr-1 h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+            Back to Marketplace
+          </Link>
+
+          <div className="flex flex-col md:flex-row gap-8 items-start">
+             <div className="w-24 h-24 md:w-32 md:h-32 rounded-[2rem] bg-gradient-to-br from-primary/10 to-blue-500/10 border border-primary/20 flex items-center justify-center overflow-hidden shrink-0 shadow-2xl">
+                {endpoint.imageUrl ? (
+                    <img src={endpoint.imageUrl} alt={endpoint.description || "API"} className="w-full h-full object-cover" />
+                ) : (
+                    <Code2 className="h-12 w-12 text-primary" />
+                )}
+             </div>
+             <div className="flex-1">
+                <div className="flex flex-wrap items-center gap-2 mb-4">
+                    <Badge variant="outline" className="bg-background/50 backdrop-blur-sm border-primary/20 text-primary">
+                        {endpoint.category || "General"}
+                    </Badge>
+                    <Badge variant="outline" className="bg-background/50 backdrop-blur-sm">
+                        <Shield className="h-3 w-3 mr-1 text-primary" />
+                        {endpoint.chainName}
+                    </Badge>
+                    <Badge variant="outline" className="bg-background/50 backdrop-blur-sm capitalize">
+                        <Clock className="h-3 w-3 mr-1 text-primary" />
+                        Active since {new Date(endpoint.createdAt).toLocaleDateString()}
+                    </Badge>
+                </div>
+                <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
+                    {endpoint.description || "Unnamed API Endpoint"}
+                </h1>
+                <div className="flex items-center gap-3 text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary border border-primary/20">
+                            {endpoint.providerName?.[0] || 'P'}
+                        </div>
+                        <span className="text-sm font-medium">{endpoint.providerName || "Anonymous Provider"}</span>
+                    </div>
+                    <span className="text-muted-foreground/30">•</span>
+                    <Link 
+                        href={endpoint.docsUrl || "#"} 
+                        target="_blank"
+                        className="text-sm hover:text-primary flex items-center gap-1 transition-colors"
+                    >
+                        Documentation <ExternalLink className="h-3 w-3" />
+                    </Link>
+                </div>
+             </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 -mt-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Main Content */}
+            <div className="lg:col-span-2 space-y-8">
+                {/* Description & Overview */}
+                <Card className="rounded-[2.5rem] border-border/50 shadow-xl overflow-hidden bg-card/50 backdrop-blur-sm">
+                    <CardHeader className="pb-4">
+                        <CardTitle className="text-2xl">Overview</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <p className="text-lg text-muted-foreground leading-relaxed">
+                            {endpoint.description || "This API provides a high-performance, decentralized gateway to various data sources and computational services with native Web3 payments."}
+                        </p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="p-4 rounded-2xl bg-muted/50 border border-border/50">
+                                <h4 className="text-sm font-bold flex items-center gap-2 mb-2">
+                                    <Zap className="h-4 w-4 text-primary" /> Instant Integration
+                                </h4>
+                                <p className="text-xs text-muted-foreground">Connect via our global edge gateway with minimal latency.</p>
+                            </div>
+                            <div className="p-4 rounded-2xl bg-muted/50 border border-border/50">
+                                <h4 className="text-sm font-bold flex items-center gap-2 mb-2">
+                                    <Shield className="h-4 w-4 text-blue-500" /> Secure Payments
+                                </h4>
+                                <p className="text-xs text-muted-foreground">Pay-per-use directly in {endpoint.tokenSymbol} on the {endpoint.chainName} network.</p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Technical Integration */}
+                <Card className="rounded-[2.5rem] border-border/50 shadow-xl overflow-hidden bg-card/50 backdrop-blur-sm">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Code2 className="h-6 w-6 text-primary" /> Integration Guide
+                        </CardTitle>
+                        <CardDescription>Use the following sample to integrate this API into your application.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Tabs defaultValue="curl" className="w-full">
+                            <TabsList className="grid w-full grid-cols-3 rounded-xl mb-4">
+                                <TabsTrigger value="curl" className="rounded-lg">cURL</TabsTrigger>
+                                <TabsTrigger value="js" className="rounded-lg">JavaScript</TabsTrigger>
+                                <TabsTrigger value="python" className="rounded-lg">Python</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="curl" className="relative group">
+                                <pre className="p-6 rounded-2xl bg-muted font-mono text-sm overflow-x-auto border border-border/50">
+                                    {curlExample}
+                                </pre>
+                                <Button 
+                                    size="icon" 
+                                    variant="ghost" 
+                                    className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    onClick={() => copyToClipboard(curlExample)}
+                                >
+                                    {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                                </Button>
+                            </TabsContent>
+                            <TabsContent value="js">
+                                <pre className="p-6 rounded-2xl bg-muted font-mono text-sm overflow-x-auto border border-border/50 text-muted-foreground">
+                                    // SDK Implementation coming soon...
+                                </pre>
+                            </TabsContent>
+                            <TabsContent value="python">
+                                <pre className="p-6 rounded-2xl bg-muted font-mono text-sm overflow-x-auto border border-border/50 text-muted-foreground">
+                                    # Python implementation coming soon...
+                                </pre>
+                            </TabsContent>
+                        </Tabs>
+                    </CardContent>
+                </Card>
+
+                {/* Sample Response */}
+                {endpoint.sampleResponse && (
+                    <Card className="rounded-[2.5rem] border-border/50 shadow-xl overflow-hidden bg-card/50 backdrop-blur-sm">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2 text-xl">
+                                <Database className="h-5 w-5 text-primary" /> Sample Data
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <pre className="p-6 rounded-2xl bg-zinc-950 text-zinc-300 font-mono text-xs overflow-x-auto shadow-inner border border-zinc-800">
+                                {endpoint.sampleResponse}
+                            </pre>
+                        </CardContent>
+                    </Card>
+                )}
+            </div>
+
+            {/* Sidebar / Checkout */}
+            <div className="space-y-6">
+                <Card className="rounded-[2.5rem] border-primary/20 shadow-2xl overflow-hidden bg-background relative border-2">
+                    <div className="absolute top-0 right-0 p-4">
+                        <div className="bg-primary/10 text-primary text-[10px] font-black uppercase tracking-tighter px-2 py-0.5 rounded-full">Best Value</div>
+                    </div>
+                    <CardHeader className="pt-10">
+                        <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Pricing Tier</CardTitle>
+                        <div className="mt-4 flex items-baseline gap-2">
+                            <span className="text-5xl font-black tracking-tight">
+                                {formatUnits(endpoint.priceAmount, endpoint.tokenDecimals ?? 18)}
+                            </span>
+                            <span className="text-xl font-bold text-muted-foreground">{endpoint.tokenSymbol}</span>
+                            <span className="text-muted-foreground">/ call</span>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                         <div className="space-y-3 py-4">
+                            <div className="flex items-center text-sm gap-2">
+                                <Check className="h-4 w-4 text-green-500 shrink-0" />
+                                <span>High Availability (99.9% Uptime)</span>
+                            </div>
+                            <div className="flex items-center text-sm gap-2">
+                                <Check className="h-4 w-4 text-green-500 shrink-0" />
+                                <span>Standard Latency Gateway</span>
+                            </div>
+                            <div className="flex items-center text-sm gap-2">
+                                <Check className="h-4 w-4 text-green-500 shrink-0" />
+                                <span>Basic Analytics Dashboard</span>
+                            </div>
+                         </div>
+                         <Button className="w-full py-7 text-lg rounded-2xl shadow-lg shadow-primary/20 group font-bold" size="lg">
+                            Get Access Now
+                            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                         </Button>
+                         <p className="text-[10px] text-center text-muted-foreground pt-2">
+                            By clicking, you will be redirected to the checkout flow on the {endpoint.chainName} network.
+                         </p>
+                    </CardContent>
+                </Card>
+
+                <Card className="rounded-[2.5rem] border-border/50 bg-muted/20">
+                    <CardHeader>
+                        <CardTitle className="text-lg">Network Info</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="flex justify-between items-center py-2 border-b border-border/50">
+                            <span className="text-sm text-muted-foreground">Blockchain</span>
+                            <span className="text-sm font-bold">{endpoint.chainName}</span>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-b border-border/50">
+                            <span className="text-sm text-muted-foreground">Currency</span>
+                            <span className="text-sm font-bold">{endpoint.tokenSymbol}</span>
+                        </div>
+                        <Link href={`https://explorer.flow402.com/endpoint/${id}`} target="_blank" className="flex justify-between items-center py-2 group">
+                            <span className="text-sm text-muted-foreground">Verification</span>
+                            <span className="text-sm font-bold flex items-center gap-1 group-hover:text-primary transition-colors">
+                                View on Explorer <ExternalLink className="h-3 w-3" />
+                            </span>
+                        </Link>
+                    </CardContent>
+                </Card>
+            </div>
+        </div>
+      </div>
+    </div>
+  );
+}
