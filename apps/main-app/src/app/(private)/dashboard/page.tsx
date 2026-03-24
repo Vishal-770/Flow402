@@ -16,7 +16,9 @@ import {
   Shield,
   Zap,
   Code2,
-  Trash2
+  Trash2,
+  Settings,
+  Pencil
 } from "lucide-react";
 import { formatUnits } from "@/src/lib/utils/units";
 import { Badge } from "@/src/components/ui/badge";
@@ -71,8 +73,19 @@ const DashboardPage = () => {
     },
   });
 
+  // Fetch My Registered APIs
+  const { data: myEndpointsData, isLoading: isLoadingMyEndpoints } = useQuery<{ success: boolean; data: MarketplaceEndpoint[] }>({
+    queryKey: ["my-endpoints"],
+    queryFn: async () => {
+      const res = await axios.get("/api/api-endpoints");
+      return res.data;
+    },
+    enabled: !!session,
+  });
+
   const favorites = favoritesData?.data ?? [];
   const favoriteEndpoints = marketplaceData?.data?.filter(ep => favorites.includes(ep.id)) ?? [];
+  const myEndpoints = myEndpointsData?.data ?? [];
 
   const handleSignOut = async () => {
     setIsLoggingOut(true);
@@ -200,6 +213,74 @@ const DashboardPage = () => {
                 ))}
               </div>
             )}
+
+            {/* My Registered APIs Section */}
+            <div className="space-y-6 pt-12">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  <Code2 className="h-6 w-6 text-primary" /> My Registered APIs
+                </h2>
+                <Badge variant="secondary" className="rounded-lg">{myEndpoints.length}</Badge>
+              </div>
+
+              {isLoadingMyEndpoints ? (
+                <div className="space-y-4">
+                  {[1, 2].map(i => <div key={i} className="h-32 rounded-3xl bg-muted animate-pulse" />)}
+                </div>
+              ) : myEndpoints.length === 0 ? (
+                <Card className="rounded-[2rem] border-dashed p-12 text-center">
+                  <Zap className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-20" />
+                  <h3 className="text-lg font-bold mb-2">No APIs registered yet</h3>
+                  <p className="text-muted-foreground mb-6">List your first API and start earning in USDC.</p>
+                  <Link href="/api-endpoints/create">
+                    <Button className="rounded-xl px-8 shadow-lg shadow-primary/20">
+                      Register API
+                    </Button>
+                  </Link>
+                </Card>
+              ) : (
+                <div className="grid gap-4">
+                  {myEndpoints.map((ep) => (
+                    <Card key={ep.id} className="rounded-3xl border-border/50 group overflow-hidden bg-card/50 backdrop-blur-sm">
+                      <div className="flex items-center p-4">
+                        <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center overflow-hidden shrink-0 group-hover:scale-105 transition-transform">
+                          {ep.imageUrl ? (
+                            <img src={ep.imageUrl} alt={ep.description || ""} className="w-full h-full object-cover" />
+                          ) : (
+                            <Code2 className="h-8 w-8 text-primary/40" />
+                          )}
+                        </div>
+                        <div className="ml-4 flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-tighter px-2 py-0">
+                              {ep.category}
+                            </Badge>
+                            <span className="text-[10px] text-muted-foreground font-bold flex items-center gap-1">
+                              <Shield className="h-2.5 w-2.5" /> {ep.chainName}
+                            </span>
+                          </div>
+                          <h4 className="font-bold text-lg group-hover:text-primary transition-colors">
+                            {ep.description || "API Endpoint"}
+                          </h4>
+                        </div>
+                        <div className="flex gap-2 ml-4">
+                          <Link href={`/api-endpoints/${ep.id}/edit`}>
+                            <Button size="sm" variant="outline" className="rounded-xl flex items-center gap-2">
+                              <Pencil className="h-3 w-3" /> Edit
+                            </Button>
+                          </Link>
+                          <Link href={`/marketplace/${ep.id}`}>
+                            <Button size="icon" variant="ghost" className="rounded-xl">
+                              <ExternalLink className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Quick Stats / Account Info */}

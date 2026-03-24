@@ -8,6 +8,7 @@ import {
   apiUpstreamHeaders,
   apiQueryParams,
   apiRequestBodies,
+  apiTags,
 } from "@/src/drizzle/schema";
 import { createApiEndpointSchema } from "@/src/lib/validators/api-endpoint";
 import { auth } from "@/src/lib/auth";
@@ -161,6 +162,20 @@ export async function POST(req: Request) {
             createdAt: now,
           }))
         );
+      }
+
+      if (body.tags && body.tags.length > 0) {
+        const uniqueTags = Array.from(new Set(body.tags.map(t => t.trim().toLowerCase()))).filter(t => t !== "");
+        if (uniqueTags.length > 0) {
+          await tx.insert(apiTags).values(
+            uniqueTags.map((tag) => ({
+              id: uuidv4(),
+              apiEndpointId: newId,
+              tag: tag,
+              createdAt: now,
+            }))
+          );
+        }
       }
     });
 

@@ -36,6 +36,7 @@ export const createApiEndpointSchema = z.object({
     .optional()
     .or(z.literal("")),
   category: z.string().optional(),
+  tags: z.array(z.string()).optional(),
   upstreamHeaders: z.array(upstreamHeaderSchema).optional(),
   queryParams: z.array(queryParamSchema).optional(),
   requestBody: z.array(requestBodySchema).optional(),

@@ -142,6 +142,7 @@ export default function CreateApiEndpointPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [imagePublicId, setImagePublicId] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [tagInput, setTagInput] = useState("");
 
   // ─── Form Setup ────────────────────────────────────────────────────────
   const form = useForm<FormValues>({
@@ -161,6 +162,7 @@ export default function CreateApiEndpointPage() {
       upstreamHeaders: [],
       queryParams: [],
       requestBody: [],
+      tags: [],
     },
     mode: "onChange",
   });
@@ -445,6 +447,64 @@ export default function CreateApiEndpointPage() {
                                 <AlertCircle className="h-3 w-3" /> {errors.docsUrl.message}
                             </p>
                         )}
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="tags">Tags</Label>
+                        <div className="flex gap-2">
+                            <Input
+                                id="tags"
+                                placeholder="Add a tag..."
+                                value={tagInput}
+                                onChange={(e) => setTagInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                        e.preventDefault();
+                                        const tag = tagInput.trim();
+                                        if (tag) {
+                                            const currentTags = form.getValues("tags") || [];
+                                            if (!currentTags.includes(tag)) {
+                                                form.setValue("tags", [...currentTags, tag]);
+                                            }
+                                            setTagInput("");
+                                        }
+                                    }
+                                }}
+                            />
+                            <Button 
+                                type="button" 
+                                variant="outline" 
+                                size="icon"
+                                onClick={() => {
+                                    const tag = tagInput.trim();
+                                    if (tag) {
+                                        const currentTags = form.getValues("tags") || [];
+                                        if (!currentTags.includes(tag)) {
+                                            form.setValue("tags", [...currentTags, tag]);
+                                        }
+                                        setTagInput("");
+                                    }
+                                }}
+                            >
+                                <Plus className="h-4 w-4" />
+                            </Button>
+                        </div>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                            {form.watch("tags")?.map((tag) => (
+                                <Badge key={tag} variant="secondary" className="flex items-center gap-1 bg-primary/10 text-primary border-primary/20 transition-all hover:bg-primary/20">
+                                    {tag}
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const currentTags = form.getValues("tags") || [];
+                                            form.setValue("tags", currentTags.filter((t) => t !== tag));
+                                        }}
+                                        className="hover:text-destructive transition-colors"
+                                    >
+                                        <X className="h-3 w-3" />
+                                    </button>
+                                </Badge>
+                            ))}
+                        </div>
                     </div>
                 </div>
                 

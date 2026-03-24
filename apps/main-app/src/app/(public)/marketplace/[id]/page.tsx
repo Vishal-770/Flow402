@@ -108,6 +108,7 @@ interface MarketplaceEndpointDetail {
   upstreamHeaders?: UpstreamHeader[];
   queryParams?: QueryParam[];
   requestBody?: RequestBodyField[];
+  tags: string[];
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -284,6 +285,11 @@ export default function EndpointDetailPage() {
                         <Star className="h-3 w-3 fill-current" />
                         {stats?.averageRating.toFixed(1) || "0.0"} ({stats?.totalCount || 0})
                     </div>
+                    {endpoint.tags && endpoint.tags.map(tag => (
+                        <Badge key={tag} variant="secondary" className="bg-primary/5 text-primary/70 border-primary/20 text-[10px] uppercase font-black px-2 py-0">
+                            {tag}
+                        </Badge>
+                    ))}
                 </div>
                 <div className="flex items-center justify-between gap-4 mb-4">
                     <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">

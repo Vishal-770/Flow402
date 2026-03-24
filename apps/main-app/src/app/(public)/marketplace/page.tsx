@@ -25,7 +25,8 @@ import {
   Zap,
   Code2,
   Heart,
-  Star
+  Star,
+  X
 } from "lucide-react";
 import { formatUnits } from "@/src/lib/utils/units";
 import Link from "next/link";
@@ -48,6 +49,7 @@ interface MarketplaceEndpoint {
   chainName: string | null;
   providerName: string | null;
   providerImage: string | null;
+  tags: string[];
 }
 
 const CATEGORIES = [
@@ -111,7 +113,8 @@ export default function MarketplacePage() {
     const matchesSearch = 
       (ep.description?.toLowerCase() || "").includes(search.toLowerCase()) ||
       (ep.category?.toLowerCase() || "").includes(search.toLowerCase()) ||
-      (ep.tokenSymbol?.toLowerCase() || "").includes(search.toLowerCase());
+      (ep.tokenSymbol?.toLowerCase() || "").includes(search.toLowerCase()) ||
+      ep.tags.some(tag => tag.toLowerCase().includes(search.toLowerCase()));
     
     const matchesCategory = selectedCategory === "All" || ep.category === selectedCategory;
     
@@ -140,11 +143,19 @@ export default function MarketplacePage() {
                 </div>
                 <Input
                     type="text"
-                    placeholder="Search by description, category, or token..."
+                    placeholder="Search by description, category, tags, or token..."
                     className="pl-12 py-6 text-lg rounded-2xl shadow-xl border-border/50 bg-background/50 backdrop-blur-sm focus-visible:ring-primary/50"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                 />
+                {search && (
+                    <button 
+                        onClick={() => setSearch("")}
+                        className="absolute inset-y-0 right-4 flex items-center text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                        <X className="h-4 w-4" />
+                    </button>
+                )}
             </div>
         </div>
       </div>
@@ -157,12 +168,12 @@ export default function MarketplacePage() {
               <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4 flex items-center gap-2">
                 <Filter className="h-4 w-4" /> Categories
               </h3>
-              <div className="space-y-1">
+              <div className="flex flex-wrap md:flex-col gap-1 md:gap-1">
                 {CATEGORIES.map((cat) => (
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
+                    className={`text-left px-3 py-2 rounded-lg text-sm transition-all ${
                       selectedCategory === cat 
                         ? "bg-primary text-primary-foreground font-medium shadow-md shadow-primary/20" 
                         : "text-muted-foreground hover:bg-muted"
@@ -171,6 +182,31 @@ export default function MarketplacePage() {
                     {cat}
                   </button>
                 ))}
+              </div>
+            </div>
+
+            {/* Popular Tags Section */}
+            <div>
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4 flex items-center gap-2">
+                <Zap className="h-4 w-4" /> Popular Tags
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {Array.from(new Set(allEndpoints.flatMap(ep => ep.tags))).slice(0, 15).map(tag => (
+                  <button
+                    key={tag}
+                    onClick={() => setSearch(tag)}
+                    className={`px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-tighter border transition-all ${
+                      search.toLowerCase() === tag.toLowerCase()
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-primary/5 text-primary/60 border-primary/10 hover:bg-primary/10 hover:text-primary"
+                    }`}
+                  >
+                    {tag}
+                  </button>
+                ))}
+                {allEndpoints.flatMap(ep => ep.tags).length === 0 && (
+                  <p className="text-xs text-muted-foreground italic">No tags found yet.</p>
+                )}
               </div>
             </div>
 
@@ -300,6 +336,22 @@ function ApiCard({
                 <p className="text-sm text-muted-foreground line-clamp-2 min-h-[40px] mb-4">
                     {ep.description || "No description provided for this high-performance API endpoint."}
                 </p>
+
+                {/* Tags */}
+                {ep.tags && ep.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mb-4">
+                        {ep.tags.slice(0, 3).map((tag) => (
+                            <Badge key={tag} variant="secondary" className="px-1.5 py-0 text-[9px] font-black uppercase tracking-tighter bg-primary/5 text-primary/60 border-primary/10">
+                                {tag}
+                            </Badge>
+                        ))}
+                        {ep.tags.length > 3 && (
+                            <span className="text-[9px] font-black text-muted-foreground self-center">
+                                +{ep.tags.length - 3}
+                            </span>
+                        )}
+                    </div>
+                )}
                 
                 <div className="flex items-center justify-between pt-4 border-t border-border/50">
                     <div className="flex flex-col">

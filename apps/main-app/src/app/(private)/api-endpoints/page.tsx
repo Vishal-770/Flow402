@@ -40,7 +40,6 @@ import {
   Trash2,
   ExternalLink,
 } from "lucide-react";
-import { EditApiEndpointDialog } from "@/src/components/api-endpoints/edit-dialog";
 import { formatUnits } from "@/src/lib/utils/units";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -70,8 +69,6 @@ interface ApiEndpointRow {
 
 export default function ApiEndpointsPage() {
   const queryClient = useQueryClient();
-
-  const [editId, setEditId] = useState<string | null>(null);
 
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -254,9 +251,11 @@ export default function ApiEndpointsPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setEditId(ep.id)}
+                            asChild
                           >
-                            <Pencil className="h-4 w-4" />
+                            <Link href={`/api-endpoints/${ep.id}/edit`}>
+                              <Pencil className="h-4 w-4" />
+                            </Link>
                           </Button>
                           <Button
                             variant="outline"
@@ -277,11 +276,6 @@ export default function ApiEndpointsPage() {
         </CardContent>
       </Card>
 
-      <EditApiEndpointDialog 
-        id={editId} 
-        open={!!editId} 
-        onOpenChange={(open) => !open && setEditId(null)} 
-      />
 
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
