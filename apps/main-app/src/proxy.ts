@@ -35,7 +35,8 @@ export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isApiRoute = pathname.startsWith("/api/api-endpoints") || 
-                     pathname.startsWith("/api/marketplace/favorites");
+                     pathname.startsWith("/api/marketplace/favorites") ||
+                     pathname.startsWith("/api/analytics");
   
   const isPrivateRoute = pathname.startsWith("/dashboard") || 
                          pathname.startsWith("/api-endpoints") || 
@@ -78,5 +79,6 @@ export const config = {
     "/profile/:path*",
     "/api/api-endpoints/:path*",
     "/api/marketplace/favorites/:path*",
+    "/api/analytics/:path*",
   ],
 };
