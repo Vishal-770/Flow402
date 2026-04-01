@@ -12,50 +12,20 @@ import {
   Link2,
   Wallet,
   User,
-  ChevronRight,
-  LogOut,
-  Settings,
   HelpCircle,
 } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 import { Button } from "@/src/components/ui/button";
+import { Separator } from "@/src/components/ui/separator";
 
 const navLinks = [
-  {
-    name: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    name: "Marketplace",
-    href: "/marketplace",
-    icon: ShoppingBag,
-  },
-  {
-    name: "My API Listings",
-    href: "/api-endpoints",
-    icon: Code2,
-  },
-  {
-    name: "Tokens",
-    href: "/tokens",
-    icon: Coins,
-  },
-  {
-    name: "Chains",
-    href: "/chains",
-    icon: Link2,
-  },
-  {
-    name: "Wallets",
-    href: "/wallets",
-    icon: Wallet,
-  },
-  {
-    name: "Profile",
-    href: "/profile",
-    icon: User,
-  },
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Marketplace", href: "/marketplace", icon: ShoppingBag },
+  { name: "My API Listings", href: "/api-endpoints", icon: Code2 },
+  { name: "Tokens", href: "/tokens", icon: Coins },
+  { name: "Chains", href: "/chains", icon: Link2 },
+  { name: "Wallets", href: "/wallets", icon: Wallet },
+  { name: "Profile", href: "/profile", icon: User },
 ];
 
 const Sidebar = () => {
@@ -64,70 +34,83 @@ const Sidebar = () => {
   return (
     <aside className="fixed left-0 top-0 bottom-0 w-72 bg-background border-r border-border z-40 hidden lg:flex flex-col">
       {/* Logo */}
-      <div className="h-16 flex items-center px-8 border-b border-border">
-        <Link href="/" className="flex items-center space-x-2">
+      <div className="h-16 flex items-center px-6 border-b border-border">
+        <Link href="/" className="flex items-center gap-2">
           <img src="/logo.png" alt="Flow402" className="h-7 w-auto" />
-          <span className="text-xl font-bold tracking-tight text-foreground">
+          <span className="text-lg font-bold tracking-tight text-foreground">
             Flow402
           </span>
         </Link>
       </div>
 
-      <div className="flex-1 overflow-y-auto py-6 px-4 space-y-8">
+      <div className="flex-1 overflow-y-auto py-6 px-3 space-y-6">
         {/* Navigation */}
         <div className="space-y-1">
-          <p className="px-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-4">
+          <p className="px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">
             Main Menu
           </p>
           {navLinks.map((link) => {
-            const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
+            const isActive =
+              pathname === link.href ||
+              pathname.startsWith(`${link.href}/`);
             return (
               <Link
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 relative",
+                  "group flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors duration-150 relative",
                   isActive
-                    ? "bg-secondary text-secondary-foreground font-semibold"
-                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                    ? "bg-accent text-accent-foreground font-semibold"
+                    : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
                 )}
               >
                 {isActive && (
-                  <div className="absolute left-0 top-2 bottom-2 w-1 bg-primary rounded-full" />
+                  <div className="absolute left-0 top-2 bottom-2 w-0.5 bg-primary rounded-full" />
                 )}
-                <link.icon className={cn(
-                  "h-5 w-5",
-                  isActive ? "text-secondary-foreground" : "text-muted-foreground/70 group-hover:text-foreground"
-                )} />
-                <span className="text-sm tracking-tight">{link.name}</span>
+                <link.icon
+                  className={cn(
+                    "h-4 w-4 shrink-0",
+                    isActive
+                      ? "text-accent-foreground"
+                      : "text-muted-foreground group-hover:text-foreground"
+                  )}
+                />
+                <span className="text-sm">{link.name}</span>
               </Link>
             );
           })}
         </div>
 
-        {/* Shortcuts */}
+        <Separator />
+
+        {/* Actions */}
         <div className="space-y-1">
-          <p className="px-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-4">
+          <p className="px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">
             Actions
           </p>
           <Link
             href="/api-endpoints/create"
-            className="group flex items-center gap-3 px-4 py-3 rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-all duration-200 shadow-sm shadow-primary/10"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors duration-150 font-medium text-sm"
           >
-            <PlusCircle className="h-5 w-5" />
-            <span className="font-semibold text-sm">Register API</span>
+            <PlusCircle className="h-4 w-4 shrink-0" />
+            Register API
           </Link>
         </div>
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t border-border">
-        <div className="p-4 rounded-2xl bg-muted/30 border border-border/50 space-y-4">
-          <div className="flex items-center gap-3 px-1">
-            <HelpCircle className="h-4 w-4 text-muted-foreground" />
-            <span className="text-xs font-semibold text-muted-foreground">Resources & Help</span>
+      <div className="p-3 border-t border-border">
+        <div className="p-3 rounded-lg bg-muted/50 border border-border space-y-3">
+          <div className="flex items-center gap-2 px-1">
+            <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-xs font-medium text-muted-foreground">
+              Resources & Help
+            </span>
           </div>
-          <Button variant="outline" className="w-full rounded-lg text-xs h-9 font-semibold bg-background border-border">
+          <Button
+            variant="outline"
+            className="w-full rounded-lg text-xs h-8 font-medium"
+          >
             Read Docs
           </Button>
         </div>

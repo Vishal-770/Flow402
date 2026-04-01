@@ -15,11 +15,11 @@ export default async function PrivateLayout({
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="bg-background">
       <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-72">
+      <div className="lg:pl-72 min-w-0">
         <Navbar />
-        <main className="flex-1 pt-16 overflow-y-auto">
+        <main className="pt-16">
           {children}
         </main>
       </div>

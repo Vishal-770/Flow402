@@ -7,6 +7,7 @@ import { Button } from "@/src/components/ui/button";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ModeToggle } from "@/src/components/ModeToggle";
+import { Loader2 } from "lucide-react";
 
 const Navbar = () => {
   const { data: session, isPending } = authClient.useSession();
@@ -22,7 +23,6 @@ const Navbar = () => {
     setIsLoggingOut(true);
     toast.loading("Signing out...", { id: "logout" });
 
-    // Add a small delay for smooth experience
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
     await authClient.signOut({
@@ -42,44 +42,26 @@ const Navbar = () => {
     });
   };
 
-  const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "Marketplace", href: "/marketplace" },
-    { name: "My APIs", href: "/api-endpoints" },
-    { name: "Dashboard", href: "/dashboard" },
-  ];
-
   return (
-    <nav className="fixed top-0 left-0 lg:left-72 right-0 z-50 flex items-center justify-between h-16 px-6 md:px-12 bg-background/80 backdrop-blur-md border-b border-border transition-all duration-300">
-      <div className="flex items-center space-x-8">
-        <Link href="/" className="flex items-center space-x-2 lg:hidden">
+    <nav className="fixed top-0 left-0 lg:left-72 right-0 z-50 flex items-center justify-between h-16 px-6 md:px-12 bg-background/80 backdrop-blur-md border-b border-border">
+      <div className="flex items-center gap-8">
+        <Link href="/" className="flex items-center gap-2 lg:hidden">
           <img src="/logo.png" alt="Flow402" className="h-7 w-auto" />
           <span className="text-xl font-bold tracking-tight text-foreground">
             Flow402
           </span>
         </Link>
-        <div className="hidden items-center space-x-2">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary hover:bg-muted/50 rounded-md transition-all"
-            >
-              {link.name}
-            </Link>
-          ))}
-        </div>
       </div>
 
-      <div className="flex items-center space-x-2 md:space-x-4">
+      <div className="flex items-center gap-2 md:gap-3">
         <ModeToggle />
         {!isMounted || isPending ? (
           <div className="h-8 w-8 animate-pulse bg-muted rounded-full" />
         ) : session ? (
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-3">
             <Link
               href="/profile"
-              className="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-muted/50 hover:bg-muted border border-border transition-all"
+              className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted hover:bg-accent border border-border transition-colors"
             >
               <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">
                 {session.user.name?.[0] || session.user.email[0]}
@@ -96,23 +78,21 @@ const Navbar = () => {
               className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
             >
               {isLoggingOut ? (
-                <Loader2 />
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 "Sign Out"
               )}
             </Button>
           </div>
         ) : (
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <Link href="/signin">
               <Button variant="ghost" size="sm">
                 Sign In
               </Button>
             </Link>
             <Link href="/signin">
-              <Button size="sm" className="bg-primary hover:bg-primary/90">
-                Get Started
-              </Button>
+              <Button size="sm">Get Started</Button>
             </Link>
           </div>
         )}
@@ -120,29 +100,5 @@ const Navbar = () => {
     </nav>
   );
 };
-
-const Loader2 = () => (
-  <svg
-    className="animate-spin h-4 w-4"
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-  >
-    <circle
-      className="opacity-25"
-      cx="12"
-      cy="12"
-      r="10"
-      stroke="currentColor"
-      strokeWidth="4"
-    ></circle>
-    <path
-      className="opacity-75"
-      fill="currentColor"
-      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-    ></path>
-  </svg>
-);
-
 
 export default Navbar;
