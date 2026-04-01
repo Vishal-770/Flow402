@@ -3,11 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
 import { authClient } from "@/src/lib/auth-client";
-import { ConnectButton, useActiveAccount } from "thirdweb/react";
-import { client } from "@/src/components/thirdweb-provider";
 import { Button } from "@/src/components/ui/button";
 import {
   Card,
@@ -17,156 +13,19 @@ import {
   CardTitle,
 } from "@/src/components/ui/card";
 import { Separator } from "@/src/components/ui/separator";
-import { Badge } from "@/src/components/ui/badge";
 import { toast } from "sonner";
 import {
-  Wallet,
-  Copy,
-  Check,
   Loader2,
-  Trash2,
-  Link as LinkIcon,
   CheckCircle2,
-  Unplug,
+  ChevronRight,
 } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/src/components/ui/alert-dialog";
-
-// ─── Types ───────────────────────────────────────────────────────────────────
-
-interface WalletRow {
-  id: string;
-  address: string;
-  createdAt: string;
-}
-
-interface WalletsApiResponse {
-  success: boolean;
-  data: WalletRow[];
-}
-
-interface SaveWalletResponse {
-  success: boolean;
-  id: string;
-  message?: string;
-}
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
 const ProfilePage = () => {
   const { data: session, isPending } = authClient.useSession();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
-  const [linkingAddress, setLinkingAddress] = useState<string | null>(null);
-
-  // Delete wallet state
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [deleteWalletId, setDeleteWalletId] = useState<string | null>(null);
-  const [deleteWalletAddress, setDeleteWalletAddress] = useState("");
-
-  // ─── Thirdweb: active account ──────────────────────────────────────────
-  const activeAccount = useActiveAccount();
-
-  // ─── Fetch saved/linked wallets from DB ────────────────────────────────
-  const walletsQuery = useQuery<WalletsApiResponse>({
-    queryKey: ["wallets"],
-    queryFn: async () => {
-      const res = await axios.get<WalletsApiResponse>("/api/wallets");
-      return res.data;
-    },
-    enabled: !!session?.user?.id,
-  });
-
-  const savedWallets = walletsQuery.data?.data ?? [];
-  const savedAddresses = new Set(
-    savedWallets.map((w) => w.address.toLowerCase())
-  );
-
-  // ─── Link wallet mutation (save to DB) ─────────────────────────────────
-  const linkWalletMutation = useMutation({
-    mutationFn: async (address: string) => {
-      const res = await axios.post<SaveWalletResponse>("/api/wallets", {
-        address,
-      });
-      return res.data;
-    },
-    onSuccess: (data) => {
-      if (data.message === "Wallet already saved") {
-        toast.info("This wallet is already linked");
-      } else {
-        toast.success("Wallet linked to your account!");
-      }
-      setLinkingAddress(null);
-      queryClient.invalidateQueries({ queryKey: ["wallets"] });
-    },
-    onError: () => {
-      toast.error("Failed to link wallet");
-      setLinkingAddress(null);
-    },
-  });
-
-  // ─── Delete wallet mutation ────────────────────────────────────────────
-  const deleteWalletMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const res = await axios.delete(`/api/wallets/${id}`);
-      return res.data as { success: boolean };
-    },
-    onSuccess: () => {
-      toast.success("Wallet unlinked");
-      setDeleteOpen(false);
-      queryClient.invalidateQueries({ queryKey: ["wallets"] });
-    },
-    onError: () => {
-      toast.error("Failed to unlink wallet");
-    },
-  });
-
-  // ─── Handlers ──────────────────────────────────────────────────────────
-
-  const handleLinkWallet = (address: string) => {
-    setLinkingAddress(address);
-    linkWalletMutation.mutate(address);
-  };
-
-  const isAddressLinked = (address: string) =>
-    savedAddresses.has(address.toLowerCase());
-
-  const getLinkedWalletId = (address: string) => {
-    const found = savedWallets.find(
-      (w) => w.address.toLowerCase() === address.toLowerCase()
-    );
-    return found?.id ?? null;
-  };
-
-  const handleCopyAddress = async (address: string) => {
-    try {
-      await navigator.clipboard.writeText(address);
-      setCopiedAddress(address);
-      toast.success("Address copied to clipboard");
-      setTimeout(() => setCopiedAddress(null), 2000);
-    } catch {
-      toast.error("Failed to copy address");
-    }
-  };
-
-  const openDeleteWallet = (address: string) => {
-    const walletId = getLinkedWalletId(address);
-    if (walletId) {
-      setDeleteWalletId(walletId);
-      setDeleteWalletAddress(address);
-      setDeleteOpen(true);
-    }
-  };
 
   const handleSignOut = async () => {
     setIsLoggingOut(true);
@@ -197,8 +56,8 @@ const ProfilePage = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">Loading...</p>
+          <Loader2 className="animate-spin h-8 w-8 text-primary mx-auto" />
+          <p className="mt-2 text-muted-foreground">Loading profile...</p>
         </div>
       </div>
     );
@@ -207,338 +66,109 @@ const ProfilePage = () => {
   // ─── Render ─────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Main Content */}
+    <div className="min-h-screen bg-background text-foreground">
       <main className="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">Profile</h1>
+          <div className="mb-10">
+            <h1 className="text-3xl font-bold tracking-tight mb-2">Account</h1>
             <p className="text-muted-foreground">
-              Manage your account settings and preferences.
+              Manage your personal information and verification status.
             </p>
           </div>
 
           {session && (
             <div className="grid gap-6 md:grid-cols-2">
               {/* User Information Card */}
-              <Card>
+              <Card className="border-border">
                 <CardHeader>
-                  <CardTitle>Account Information</CardTitle>
+                  <CardTitle className="tracking-tight">Account Information</CardTitle>
                   <CardDescription>
-                    Your basic account details and verification status.
+                    Your primary account details.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">
-                      Name
+                <CardContent className="space-y-6">
+                  <div className="space-y-1.5 px-1">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+                      Display Name
                     </label>
-                    <p className="text-muted-foreground">
+                    <p className="font-semibold text-foreground">
                       {session.user.name || "Not provided"}
                     </p>
                   </div>
-                  <Separator />
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">
-                      Email
+                  <Separator className="opacity-50" />
+                  <div className="space-y-1.5 px-1">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+                      Email Address
                     </label>
-                    <p className="text-muted-foreground">
+                    <p className="font-semibold text-foreground">
                       {session.user.email}
                     </p>
                   </div>
-                  <Separator />
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">
-                      Email Verified
+                  <Separator className="opacity-50" />
+                  <div className="space-y-1.5 px-1">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+                      Verification Status
                     </label>
-                    <p className="text-muted-foreground">
+                    <div className="flex items-center gap-2 pt-1">
                       {session.user.emailVerified ? (
-                        <span className="text-green-600 dark:text-green-400">
-                          ✓ Verified
-                        </span>
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/10 text-green-600 border border-green-500/20 text-[11px] font-bold">
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                          VERIFIED
+                        </div>
                       ) : (
-                        <span className="text-red-600 dark:text-red-400">
-                          ✗ Not verified
-                        </span>
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-500/10 text-red-600 border border-red-500/20 text-[11px] font-bold">
+                          NOT VERIFIED
+                        </div>
                       )}
-                    </p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
               {/* Account Actions Card */}
-              <Card>
+              <Card className="border-border flex flex-col">
                 <CardHeader>
-                  <CardTitle>Account Actions</CardTitle>
+                  <CardTitle className="tracking-tight">Preferences</CardTitle>
                   <CardDescription>
-                    Manage your account and session.
+                    Manage your active session.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">
-                      Need to update your information? Contact support for
-                      account changes.
+                <CardContent className="space-y-6 flex-1">
+                  <div className="space-y-1.5 px-1">
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Security and sensitive data changes require additional verification steps. Contact support if you need to update restricted fields.
                     </p>
                   </div>
-                  <Separator />
-                  <div className="space-y-3">
-                    <Link href="/dashboard">
-                      <Button variant="outline" className="w-full">
-                        Back to Dashboard
+                  <Separator className="opacity-50" />
+                  <div className="pt-2 space-y-3">
+                    <Link href="/wallets" className="block">
+                      <Button variant="outline" className="w-full rounded-xl h-11 font-semibold group transition-all">
+                        Manage Wallets
+                        <ChevronRight className="ml-2 h-4 w-4 opacity-0 group-hover:opacity-50 transition-opacity" />
                       </Button>
                     </Link>
                     <Button
                       variant="destructive"
                       onClick={handleSignOut}
                       disabled={isLoggingOut}
-                      className="w-full"
+                      className="w-full rounded-xl h-11 font-semibold shadow-sm"
                     >
                       {isLoggingOut ? (
                         <>
                           <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
-                          Signing out...
+                          SIGNING OUT...
                         </>
                       ) : (
-                        "Sign Out"
+                        "SIGN OUT"
                       )}
                     </Button>
                   </div>
-                </CardContent>
-              </Card>
-
-              {/* Wallet Card — spans full width */}
-              <Card className="md:col-span-2">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="flex items-center gap-2">
-                        <Wallet className="h-5 w-5" />
-                        Wallets
-                      </CardTitle>
-                      <CardDescription>
-                        Connect your wallet to verify ownership, then link it to
-                        your account.
-                      </CardDescription>
-                    </div>
-                    <ConnectButton
-                      client={client}
-                      theme={"dark"}
-                      connectButton={{
-                        label: "Connect Wallet",
-                        className: "h-9 px-3 text-xs",
-                      }}
-                    />
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* ── Active wallet from Thirdweb (available to link) ── */}
-                  {activeAccount && (
-                    <div>
-                      <h3 className="text-sm font-medium text-foreground mb-3">
-                        Active Wallet
-                      </h3>
-                      <p className="text-xs text-muted-foreground mb-3">
-                        This wallet is currently connected. Click
-                        &quot;Link&quot; to save it to your account.
-                      </p>
-                      <div className="space-y-2">
-                        {(() => {
-                          const linked = isAddressLinked(activeAccount.address);
-                          const isLinking = linkingAddress === activeAccount.address;
-
-                          return (
-                            <div
-                              key={activeAccount.address}
-                              className="flex items-center justify-between gap-4 rounded-lg border border-border bg-muted/20 p-3"
-                            >
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <Badge
-                                    variant="secondary"
-                                    className="text-xs"
-                                  >
-                                    Ethereum
-                                  </Badge>
-                                  <Badge variant="outline" className="text-xs">
-                                    Active
-                                  </Badge>
-                                </div>
-                                <p className="font-mono text-sm text-foreground truncate">
-                                  {activeAccount.address}
-                                </p>
-                              </div>
-                              <div className="flex gap-2 shrink-0">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() =>
-                                    handleCopyAddress(activeAccount.address)
-                                  }
-                                >
-                                  {copiedAddress === activeAccount.address ? (
-                                    <Check className="h-4 w-4 text-green-500" />
-                                  ) : (
-                                    <Copy className="h-4 w-4" />
-                                  )}
-                                </Button>
-                                {linked ? (
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    disabled
-                                    className="text-green-600 border-green-600/30"
-                                  >
-                                    <CheckCircle2 className="mr-1.5 h-4 w-4" />
-                                    Linked
-                                  </Button>
-                                ) : (
-                                  <Button
-                                    size="sm"
-                                    onClick={() =>
-                                      handleLinkWallet(activeAccount.address)
-                                    }
-                                    disabled={isLinking}
-                                  >
-                                    {isLinking ? (
-                                      <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-                                    ) : (
-                                      <LinkIcon className="mr-1.5 h-4 w-4" />
-                                    )}
-                                    {isLinking ? "Linking..." : "Link"}
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })()}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* ── Divider if both sections present ── */}
-                  {activeAccount && savedWallets.length > 0 && (
-                    <Separator />
-                  )}
-
-                  {/* ── Linked wallets (saved in DB) ── */}
-                  <div>
-                    <h3 className="text-sm font-medium text-foreground mb-3">
-                      Linked Wallets
-                    </h3>
-                    {walletsQuery.isLoading ? (
-                      <div className="flex justify-center py-4">
-                        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                      </div>
-                    ) : savedWallets.length === 0 ? (
-                      <div className="text-center py-6 text-muted-foreground">
-                        <Wallet className="h-10 w-10 mx-auto mb-3 opacity-40" />
-                        <p className="text-sm">
-                          No wallets linked yet. Connect a wallet above, then
-                          click &quot;Link&quot; to save it.
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        {savedWallets.map((wallet) => (
-                          <div
-                            key={wallet.id}
-                            className="flex items-center justify-between gap-4 rounded-lg border border-border bg-muted/30 p-4"
-                          >
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <Badge
-                                  variant="secondary"
-                                  className="text-xs"
-                                >
-                                  Ethereum
-                                </Badge>
-                                <Badge variant="outline" className="text-xs">
-                                  Verified
-                                </Badge>
-                              </div>
-                              <p className="font-mono text-sm text-foreground truncate">
-                                {wallet.address}
-                              </p>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                Linked{" "}
-                                {new Date(
-                                  wallet.createdAt
-                                ).toLocaleDateString()}
-                              </p>
-                            </div>
-                            <div className="flex gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                  handleCopyAddress(wallet.address)
-                                }
-                              >
-                                {copiedAddress === wallet.address ? (
-                                  <Check className="h-4 w-4 text-green-500" />
-                                ) : (
-                                  <Copy className="h-4 w-4" />
-                                )}
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                  openDeleteWallet(wallet.address)
-                                }
-                                className="text-destructive hover:text-destructive"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* ── Empty state when no wallets connected at all ── */}
-                  {!activeAccount && savedWallets.length === 0 && (
-                    <div className="text-center py-4 text-muted-foreground">
-                      <p className="text-sm">
-                        Use the &quot;Connect Wallet&quot; button above.
-                      </p>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             </div>
           )}
         </div>
       </main>
-
-      {/* Delete Wallet Dialog */}
-      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Unlink Wallet</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to unlink wallet{" "}
-              <strong className="font-mono text-xs break-all">
-                {deleteWalletAddress}
-              </strong>
-              ? You can always link it again later.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                if (deleteWalletId) deleteWalletMutation.mutate(deleteWalletId);
-              }}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {deleteWalletMutation.isPending ? "Unlinking..." : "Unlink"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };

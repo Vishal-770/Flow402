@@ -6,6 +6,7 @@ import { authClient } from "@/src/lib/auth-client";
 import { Button } from "@/src/components/ui/button";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { ModeToggle } from "@/src/components/ModeToggle";
 
 const Navbar = () => {
   const { data: session, isPending } = authClient.useSession();
@@ -51,11 +52,9 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 left-0 lg:left-72 right-0 z-50 flex items-center justify-between h-16 px-6 md:px-12 bg-background/80 backdrop-blur-md border-b border-border transition-all duration-300">
       <div className="flex items-center space-x-8">
-        <Link href="/" className="flex items-center space-x-2 group lg:hidden">
-          <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center font-bold text-primary-foreground shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
-            F
-          </div>
-          <span className="text-xl font-bold tracking-tight hidden sm:block bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
+        <Link href="/" className="flex items-center space-x-2 lg:hidden">
+          <img src="/logo.png" alt="Flow402" className="h-7 w-auto" />
+          <span className="text-xl font-bold tracking-tight text-foreground">
             Flow402
           </span>
         </Link>
@@ -72,7 +71,8 @@ const Navbar = () => {
         </div>
       </div>
 
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-2 md:space-x-4">
+        <ModeToggle />
         {!isMounted || isPending ? (
           <div className="h-8 w-8 animate-pulse bg-muted rounded-full" />
         ) : session ? (

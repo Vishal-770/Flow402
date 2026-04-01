@@ -10,6 +10,7 @@ import {
   PlusCircle,
   Coins,
   Link2,
+  Wallet,
   User,
   ChevronRight,
   LogOut,
@@ -24,37 +25,36 @@ const navLinks = [
     name: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
-    description: "Overview & summary",
   },
   {
     name: "Marketplace",
     href: "/marketplace",
     icon: ShoppingBag,
-    description: "Discover API endpoints",
   },
   {
     name: "My API Listings",
     href: "/api-endpoints",
     icon: Code2,
-    description: "Manage your endpoints",
   },
   {
     name: "Tokens",
     href: "/tokens",
     icon: Coins,
-    description: "Manage assets",
   },
   {
     name: "Chains",
     href: "/chains",
     icon: Link2,
-    description: "Network configurations",
+  },
+  {
+    name: "Wallets",
+    href: "/wallets",
+    icon: Wallet,
   },
   {
     name: "Profile",
     href: "/profile",
     icon: User,
-    description: "Account settings",
   },
 ];
 
@@ -65,11 +65,9 @@ const Sidebar = () => {
     <aside className="fixed left-0 top-0 bottom-0 w-72 bg-background border-r border-border z-40 hidden lg:flex flex-col">
       {/* Logo */}
       <div className="h-16 flex items-center px-8 border-b border-border">
-        <Link href="/" className="flex items-center space-x-2 group">
-          <div className="w-8 h-8 bg-primary rounded-xl flex items-center justify-center font-bold text-primary-foreground shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
-            F
-          </div>
-          <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
+        <Link href="/" className="flex items-center space-x-2">
+          <img src="/logo.png" alt="Flow402" className="h-7 w-auto" />
+          <span className="text-xl font-bold tracking-tight text-foreground">
             Flow402
           </span>
         </Link>
@@ -88,28 +86,20 @@ const Sidebar = () => {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "group flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 relative overflow-hidden",
+                  "group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 relative",
                   isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    ? "bg-secondary text-secondary-foreground font-semibold"
+                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                 )}
               >
                 {isActive && (
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-full" />
+                  <div className="absolute left-0 top-2 bottom-2 w-1 bg-primary rounded-full" />
                 )}
                 <link.icon className={cn(
-                  "h-5 w-5 transition-transform group-hover:scale-110",
-                  isActive ? "text-primary" : "text-muted-foreground/70 group-hover:text-foreground"
+                  "h-5 w-5",
+                  isActive ? "text-secondary-foreground" : "text-muted-foreground/70 group-hover:text-foreground"
                 )} />
-                <div className="flex flex-col">
-                  <span className="font-bold text-sm leading-none">{link.name}</span>
-                  <span className="text-[10px] font-medium opacity-60 group-hover:opacity-100 transition-opacity">
-                    {link.description}
-                  </span>
-                </div>
-                {isActive && (
-                  <ChevronRight className="ml-auto h-4 w-4 opacity-50" />
-                )}
+                <span className="text-sm tracking-tight">{link.name}</span>
               </Link>
             );
           })}
@@ -122,27 +112,22 @@ const Sidebar = () => {
           </p>
           <Link
             href="/api-endpoints/create"
-            className="group flex items-center gap-3 px-4 py-4 rounded-2xl bg-primary shadow-lg shadow-primary/20 text-primary-foreground hover:bg-primary/90 transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0"
+            className="group flex items-center gap-3 px-4 py-3 rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-all duration-200 shadow-sm shadow-primary/10"
           >
-            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center transition-transform group-hover:rotate-12">
-              <PlusCircle className="h-6 w-6" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-bold text-sm leading-none">Register API</span>
-              <span className="text-[10px] font-medium opacity-80">List new endpoint</span>
-            </div>
+            <PlusCircle className="h-5 w-5" />
+            <span className="font-semibold text-sm">Register API</span>
           </Link>
         </div>
       </div>
 
       {/* Footer */}
       <div className="p-4 border-t border-border">
-        <div className="p-4 rounded-3xl bg-muted/30 border border-border/50 space-y-4">
-          <div className="flex items-center gap-3 px-2">
+        <div className="p-4 rounded-2xl bg-muted/30 border border-border/50 space-y-4">
+          <div className="flex items-center gap-3 px-1">
             <HelpCircle className="h-4 w-4 text-muted-foreground" />
-            <span className="text-xs font-bold text-muted-foreground">Need help?</span>
+            <span className="text-xs font-semibold text-muted-foreground">Resources & Help</span>
           </div>
-          <Button variant="outline" className="w-full rounded-xl text-xs h-9">
+          <Button variant="outline" className="w-full rounded-lg text-xs h-9 font-semibold bg-background border-border">
             Read Docs
           </Button>
         </div>
