@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/src/lib/auth-server";
+import Navbar from "@/src/components/Navbar";
+import Sidebar from "@/src/components/Sidebar";
 
 export default async function PrivateLayout({
   children,
@@ -12,5 +14,15 @@ export default async function PrivateLayout({
     redirect("/signin");
   }
 
-  return <>{children}</>;
+  return (
+    <div className="flex min-h-screen">
+      <Sidebar />
+      <div className="flex-1 flex flex-col min-w-0 lg:pl-72">
+        <Navbar />
+        <main className="flex-1 overflow-y-auto">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
 }

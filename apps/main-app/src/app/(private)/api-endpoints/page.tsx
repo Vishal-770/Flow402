@@ -39,6 +39,7 @@ import {
   Pencil,
   Trash2,
   ExternalLink,
+  BarChart3,
 } from "lucide-react";
 import { formatUnits } from "@/src/lib/utils/units";
 
@@ -248,6 +249,15 @@ export default function ApiEndpointsPage() {
                               </a>
                             </Button>
                           )}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            asChild
+                          >
+                            <Link href={`/api-endpoints/${ep.id}/analytics`}>
+                              <BarChart3 className="h-4 w-4" />
+                            </Link>
+                          </Button>
                           <Button
                             variant="outline"
                             size="sm"

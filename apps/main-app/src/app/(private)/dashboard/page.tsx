@@ -308,17 +308,6 @@ const DashboardPage = () => {
               </CardContent>
             </Card>
 
-            <Card className="rounded-[2.5rem] border-blue-500/20 bg-blue-500/5 overflow-hidden">
-                <CardContent className="p-6">
-                    <BarChart3 className="h-10 w-10 text-blue-500 mb-4" />
-                    <h4 className="font-black text-lg mb-2">API Analytics</h4>
-                    <p className="text-sm text-muted-foreground mb-6 leading-relaxed">Track performance, usage, and revenue from your APIs.</p>
-                    <Link href="/dashboard/analytics">
-                        <Button variant="outline" className="w-full rounded-xl border-blue-500/20 hover:bg-blue-500/10">View Analytics</Button>
-                    </Link>
-                </CardContent>
-            </Card>
-            
             <Card className="rounded-[2.5rem] border-primary/20 bg-primary/5 overflow-hidden">
                 <CardContent className="p-6">
                     <Zap className="h-10 w-10 text-primary mb-4" />

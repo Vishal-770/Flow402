@@ -49,9 +49,9 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between h-16 px-6 md:px-12 bg-background/80 backdrop-blur-md border-b border-border transition-all duration-300">
+    <nav className="fixed top-0 left-0 lg:left-72 right-0 z-50 flex items-center justify-between h-16 px-6 md:px-12 bg-background/80 backdrop-blur-md border-b border-border transition-all duration-300">
       <div className="flex items-center space-x-8">
-        <Link href="/" className="flex items-center space-x-2 group">
+        <Link href="/" className="flex items-center space-x-2 group lg:hidden">
           <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center font-bold text-primary-foreground shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
             F
           </div>
@@ -59,7 +59,7 @@ const Navbar = () => {
             Flow402
           </span>
         </Link>
-        <div className="hidden lg:flex items-center space-x-2">
+        <div className="hidden items-center space-x-2">
           {navLinks.map((link) => (
             <Link
               key={link.href}

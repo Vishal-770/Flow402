@@ -39,7 +39,8 @@ import {
   List,
   Code,
   FileJson,
-  Server
+  Server,
+  BarChart3
 } from "lucide-react";
 import { Badge } from "@/src/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/src/components/ui/card";
@@ -722,7 +723,13 @@ export default function EditApiEndpointPage() {
                 </TabsContent>
             </Tabs>
 
-            <div className="flex justify-end gap-4 mt-8">
+            <div className="flex justify-end items-center gap-4 mt-8">
+                <Link href={`/api-endpoints/${id}/analytics`}>
+                    <Button type="button" variant="outline" className="rounded-2xl h-12 px-6 flex items-center gap-2">
+                        <BarChart3 className="h-4 w-4" /> View Analytics
+                    </Button>
+                </Link>
+                <div className="flex-1" />
                 <Link href="/dashboard">
                     <Button type="button" variant="ghost" className="rounded-2xl h-12 px-8">Cancel</Button>
                 </Link>
