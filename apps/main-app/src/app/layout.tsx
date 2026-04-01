@@ -41,10 +41,7 @@ export default function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-            
-              <main className="pt-16 min-h-screen">
-                {children}
-              </main>
+              {children}
               <Toaster richColors position="top-center" />
             </ThemeProvider>
           </QueryProvider>

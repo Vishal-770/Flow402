@@ -19,7 +19,7 @@ export default async function PrivateLayout({
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0 lg:pl-72">
         <Navbar />
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 pt-16 overflow-y-auto">
           {children}
         </main>
       </div>
