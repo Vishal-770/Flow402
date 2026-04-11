@@ -1,8 +1,10 @@
 import { betterAuth } from "better-auth";
-
+import { admin } from "better-auth/plugins";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "../drizzle/db";
 import * as schema from "../drizzle/schema";
+import { sendWelcomeEmail } from "./email";
+import { ac, adminRole } from "./permissions";
 
 export const auth = betterAuth({
   socialProviders: {
@@ -22,4 +24,26 @@ export const auth = betterAuth({
     provider: "pg",
     schema: schema,
   }),
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          if (user.email) {
+            await sendWelcomeEmail({
+              id: user.id,
+              email: user.email,
+              name: user.name,
+            });
+          }
+        },
+      },
+    },
+  },
+  plugins: [admin({
+    adminUserIds: ["c9Sa0FR0y236qUbVIKupYrw2JjX2YNlP"],
+    ac,
+    roles: {
+      admin: adminRole,
+    },
+  })],
 });
