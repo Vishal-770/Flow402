@@ -8,7 +8,7 @@ const upstreamHeaderSchema = z.object({
 const queryParamSchema = z.object({
   name: z.string().min(1, "Param name is required"),
   type: z.string().min(1, "Type is required"),
-  required: z.boolean().default(false),
+  required: z.boolean(),
   description: z.string().optional(),
   defaultValue: z.string().optional(),
 });
@@ -16,7 +16,7 @@ const queryParamSchema = z.object({
 const requestBodySchema = z.object({
   fieldName: z.string().min(1, "Field name is required"),
   fieldType: z.string().min(1, "Field type is required"),
-  required: z.boolean().default(false),
+  required: z.boolean(),
   description: z.string().optional(),
   exampleValue: z.string().optional(),
 });

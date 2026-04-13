@@ -18,8 +18,8 @@ export async function getAuthUser() {
  * Higher-order function to protect API routes.
  * Handles session checking and provides the user object to the handler.
  */
-export function withAuth(handler: (req: Request, user: any, params: any) => Promise<NextResponse>) {
-  return async (req: Request, { params }: { params: any }) => {
+export function withAuth(handler: (req: Request, user: { id: string; email: string; name: string | null; role?: string | null }, params: Promise<Record<string, string | string[]>>) => Promise<NextResponse>) {
+  return async (req: Request, { params }: { params: Promise<Record<string, string | string[]>> }) => {
     const user = await getAuthUser();
     if (!user) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
@@ -27,6 +27,39 @@ export function withAuth(handler: (req: Request, user: any, params: any) => Prom
     return handler(req, user, params);
   };
 }
+
+/**
+ * Higher-order function to protect admin-only API routes (tokens, chains mutations).
+ * Uses Better Auth's permission engine — checks the `catalog` permission for the
+ * given action. Works for any user with role="admin" OR in adminUserIds.
+ */
+export function withAdmin(
+  action: "create" | "update" | "delete",
+  handler: (req: Request, user: { id: string; email: string; name: string | null; role?: string | null }, params: Promise<Record<string, string | string[]>>) => Promise<NextResponse>
+) {
+  return async (req: Request, { params }: { params: Promise<Record<string, string | string[]>> }) => {
+    const user = await getAuthUser();
+    if (!user) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
+
+    // Use BA's permission engine — checks role, adminUserIds, and custom ac
+    const permission = await auth.api.userHasPermission({
+      body: {
+        userId: user.id,
+        permissions: { catalog: [action] },
+      },
+    });
+
+    if (!permission?.success) {
+      return NextResponse.json({ success: false, message: "Forbidden: Admin access required" }, { status: 403 });
+    }
+
+    return handler(req, user, params);
+  };
+}
+
+
 
 /**
  * Next.js 16 Proxy / Middleware logic.

@@ -10,7 +10,8 @@ export function parseUnits(value: string, decimals: number): bigint {
   const isNegative = cleanValue.startsWith("-");
   const absoluteValue = isNegative ? cleanValue.slice(1) : cleanValue;
   
-  let [integer, fraction = ""] = absoluteValue.split(".");
+  const [integer, fractionRest = ""] = absoluteValue.split(".");
+  let fraction = fractionRest;
   
   // Truncate fraction to decimals
   if (fraction.length > decimals) {
