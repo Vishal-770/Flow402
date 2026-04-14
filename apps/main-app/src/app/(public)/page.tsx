@@ -1,223 +1,146 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import Loader from '@/src/components/Loader';
 import Link from "next/link";
-import { Button } from "@/src/components/ui/button";
-import { Separator } from "@/src/components/ui/separator";
-import {
-  ArrowRight,
-  Zap,
-  Shield,
-  Globe,
-  Code2,
-  Layers,
-  Coins,
-  ShoppingBag,
-} from "lucide-react";
+import { Database, Link as ChainIcon, Wallet, ArrowRight } from "lucide-react";
+import BorderGlow from '@/src/components/BorderGlow';
 
 const LandingPage = () => {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <div className="flex flex-col w-full">
-      {/* Hero Section */}
-      <section className="relative pt-16 pb-20 md:pb-28 px-6">
-        {/* Subtle ambient background — using CSS vars, no hardcoded colors */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 pointer-events-none overflow-hidden">
-          <div className="absolute top-[-10%] left-[-5%] w-[40%] h-[40%] bg-primary/10 blur-[140px] rounded-full" />
-        </div>
+    <>
+      {/* Loading Screen Overlay */}
+      <div 
+        className="fixed inset-0 flex items-center justify-center bg-black z-[9999] transition-opacity duration-700 ease-in-out"
+        style={{ 
+          opacity: loading ? 1 : 0, 
+          pointerEvents: loading ? "auto" : "none" 
+        }}
+      >
+        <Loader />
+      </div>
 
-        <div className="max-w-5xl mx-auto text-center">
-          {/* Pill badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold mb-8">
-            <Zap className="w-3 h-3" />
-            <span>The Future of Web3 APIs</span>
-          </div>
+      {/* Main Page Layout */}
+      <div className="relative min-h-screen text-white bg-black">
+      {/* Hero Section (occupies full screen) */}
+      <section className="relative h-screen flex flex-col justify-end pb-24 md:pb-32 pl-8 md:pl-24 overflow-hidden">
+        {/* Background Video restricted to Hero */}
+        <video
+          src="/bg.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover z-0"
+        />
+        {/* Gradient overlay seamlessly blending video into the black sections below */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black z-0 pointer-events-none" />
 
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-foreground mb-6 leading-[1.05]">
-            Monetize and Consume{" "}
-            <span className="text-primary">Programmable APIs</span>
+        <div className="max-w-3xl relative z-10 pointer-events-auto">
+          <h1 className="text-5xl md:text-[5.5rem] font-bold text-white leading-[1.1] tracking-tighter mb-6">
+            The Premier<br />
+            x402 API<br />
+            Marketplace
           </h1>
-
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-            Flow402 is a decentralized API marketplace that empowers developers
-            to list, monetize, and integrate APIs with seamless crypto-native
-            payments and high-performance gateways.
+          <p className="text-gray-300 text-lg md:text-xl mb-10 max-w-lg leading-relaxed">
+            Powering seamless data access, historical APIs, and AI integrations to make building simpler and enable developers to ship faster.
           </p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/signin">
-              <Button size="lg" className="px-8 py-6 text-base rounded-xl group">
-                Get Started for Free
-                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
-            <Link href="/marketplace">
-              <Button
-                size="lg"
-                variant="outline"
-                className="px-8 py-6 text-base rounded-xl"
-              >
-                <ShoppingBag className="mr-2 w-4 h-4" />
-                Explore Marketplace
-              </Button>
-            </Link>
-          </div>
-
-          {/* Stats / Social Proof */}
-          <div className="mt-20 pt-12 border-t border-border">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl mx-auto">
-              {[
-                { value: "10k+", label: "API Calls/Day" },
-                { value: "500+", label: "Active Providers" },
-                { value: "50+", label: "Supported Chains" },
-                { value: "0.1s", label: "Avg. Latency" },
-              ].map((stat) => (
-                <div key={stat.label} className="text-center">
-                  <div className="text-3xl font-bold text-foreground mb-1">
-                    {stat.value}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {stat.label}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <Link href="/signin">
+            <button className="bg-white text-black font-bold py-4 px-10 rounded-full text-base hover:bg-gray-200 transition-colors cursor-pointer inline-flex items-center gap-3">
+              Get started <ArrowRight size={20} />
+            </button>
+          </Link>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-24 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight">
-              Everything you need to scale
-            </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto leading-relaxed">
-              A complete infrastructure for building, listing, and scaling your
-              API business on-chain.
+      <section className="relative bg-zinc-950/80 backdrop-blur-md py-32 px-8 md:px-24 rounded-t-[3rem] border-t border-zinc-800 shadow-[0_-15px_40px_rgba(0,0,0,0.5)] z-20">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-20 max-w-2xl">
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tighter mb-6">Built for the next generation of Web3.</h2>
+            <p className="text-gray-400 text-xl leading-relaxed">
+              Everything you need to orchestrate data across chains, manage endpoints, and confidently scale your dApps out of the box.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <FeatureCard
-              icon={<Shield className="w-5 h-5 text-primary" />}
-              title="Secure Authentication"
-              description="Enterprise-grade auth with Privy integration for seamless wallet-based sign-ins."
-            />
-            <FeatureCard
-              icon={<Globe className="w-5 h-5 text-primary" />}
-              title="Global Gateway"
-              description="High-performance edge nodes ensuring your API is accessible with minimum latency worldwide."
-            />
-            <FeatureCard
-              icon={<Coins className="w-5 h-5 text-primary" />}
-              title="On-Chain Payments"
-              description="Automatic revenue splitting and instant payouts in your favourite native tokens."
-            />
-            <FeatureCard
-              icon={<Code2 className="w-5 h-5 text-primary" />}
-              title="Developer First"
-              description="Simple SDKs and comprehensive documentation to get you up and running in minutes."
-            />
-            <FeatureCard
-              icon={<Layers className="w-5 h-5 text-primary" />}
-              title="Multi-Chain Support"
-              description="Deploy and manage APIs across Ethereum, Polygon, Arbitrum, and more."
-            />
-            <FeatureCard
-              icon={<Zap className="w-5 h-5 text-primary" />}
-              title="Real-time Analytics"
-              description="Deep insights into your API usage, performance metrics, and revenue growth."
-            />
-          </div>
-        </div>
-      </section>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            {/* Feature 1: API Marketplace */}
+            <BorderGlow borderRadius={24} backgroundColor="#121214" edgeSensitivity={40} className="h-full">
+              <div className="p-8 flex flex-col items-start gap-6 h-full">
+                <div className="bg-white/5 p-4 rounded-2xl flex items-center justify-center">
+                  <Database size={32} className="text-white" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold tracking-tight mb-3">API Marketplace</h3>
+                  <p className="text-gray-400 leading-relaxed">
+                    Discover, test, and integrate premium endpoint APIs instantly. Get deep access to historical data feeds and specialized infrastructure easily.
+                  </p>
+                </div>
+              </div>
+            </BorderGlow>
 
-      {/* CTA Section */}
-      <section className="py-24 px-6">
-        <div className="max-w-4xl mx-auto border border-border rounded-2xl bg-card overflow-hidden">
-          <div className="p-10 md:p-16 text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold mb-8">
-              <Zap className="w-3 h-3" />
-              <span>Ready to launch?</span>
-            </div>
-            <h2 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight">
-              Start building on Flow402
-            </h2>
-            <p className="text-muted-foreground md:text-lg mb-10 max-w-xl mx-auto leading-relaxed">
-              Join hundreds of developers who are already building the next
-              generation of web3 applications on Flow402.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/signin">
-                <Button size="lg" className="px-10 py-6 text-base rounded-xl font-semibold">
-                  Create Account
-                </Button>
-              </Link>
-              <Link href="/api-endpoints/create">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="px-10 py-6 text-base rounded-xl font-semibold"
-                >
-                  List your API
-                </Button>
-              </Link>
-            </div>
+            {/* Feature 2: Multi-Chain & Tokens */}
+            <BorderGlow borderRadius={24} backgroundColor="#121214" edgeSensitivity={40} className="h-full">
+              <div className="p-8 flex flex-col items-start gap-6 h-full">
+                <div className="bg-white/5 p-4 rounded-2xl flex items-center justify-center">
+                  <ChainIcon size={32} className="text-white" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold tracking-tight mb-3">Chains & Tokens</h3>
+                  <p className="text-gray-400 leading-relaxed">
+                    Natively built for a multi-chain world. Easily track metrics and manage distinct blockchains alongside supported asset tokens within integrations.
+                  </p>
+                </div>
+              </div>
+            </BorderGlow>
+
+            {/* Feature 3: Wallet Integrations */}
+            <BorderGlow borderRadius={24} backgroundColor="#121214" edgeSensitivity={40} className="h-full">
+              <div className="p-8 flex flex-col items-start gap-6 h-full">
+                <div className="bg-white/5 p-4 rounded-2xl flex items-center justify-center">
+                  <Wallet size={32} className="text-white" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold tracking-tight mb-3">Wallet Management</h3>
+                  <p className="text-gray-400 leading-relaxed">
+                    Connect supported wallets and abstract away complexity. Track your usage, limits, and authentication seamlessly in your personal dashboard.
+                  </p>
+                </div>
+              </div>
+            </BorderGlow>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-12 border-t border-border">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-foreground rounded flex items-center justify-center font-bold text-background text-[10px]">
-              F
-            </div>
-            <span className="font-bold tracking-tight text-foreground">
-              Flow402
-            </span>
+      <footer className="relative bg-[#000000] py-14 px-8 md:px-24 border-t border-zinc-900 z-20">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+          <div className="flex flex-col md:flex-row items-center gap-2">
+            <span className="text-2xl font-extrabold tracking-tighter text-white">Flow402</span>
+            <span className="hidden md:inline-block text-zinc-700 mx-2">|</span>
+            <span className="text-sm text-zinc-500">© {new Date().getFullYear()} Flow402. All rights reserved.</span>
           </div>
-          <div className="flex gap-8 text-sm text-muted-foreground">
-            <Link href="/" className="hover:text-foreground transition-colors">
-              Terms
-            </Link>
-            <Link href="/" className="hover:text-foreground transition-colors">
-              Privacy
-            </Link>
-            <Link href="/" className="hover:text-foreground transition-colors">
-              Docs
-            </Link>
-            <Link href="/" className="hover:text-foreground transition-colors">
-              Contact
-            </Link>
+          
+          <div className="flex flex-wrap justify-center md:justify-end gap-x-8 gap-y-4 text-sm font-semibold text-zinc-400">
+            <Link href="/" className="hover:text-white transition">Home</Link>
+            <Link href="/signin" className="hover:text-white transition">Marketplace</Link>
+            <Link href="#" className="hover:text-white transition">Documentation</Link>
+            <Link href="#" className="hover:text-white transition">Support</Link>
           </div>
-          <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Flow402. All rights reserved.
-          </p>
         </div>
       </footer>
     </div>
-  );
-};
+    </>
+  )
+}
 
-const FeatureCard = ({
-  icon,
-  title,
-  description,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}) => (
-  <div className="bg-card border border-border p-8 rounded-xl hover:border-primary/40 transition-colors group">
-    <div className="mb-5 p-2.5 bg-muted w-fit rounded-lg group-hover:bg-primary/10 transition-colors">
-      {icon}
-    </div>
-    <h3 className="text-base font-bold mb-2 text-card-foreground">{title}</h3>
-    <p className="text-sm text-muted-foreground leading-relaxed">
-      {description}
-    </p>
-  </div>
-);
-
-export default LandingPage;
+export default LandingPage
