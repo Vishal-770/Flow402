@@ -1,6 +1,6 @@
-const express = require('express');
-const cors = require('cors');
-const serverless = require('serverless-http');
+import express from 'express';
+import cors from 'cors';
+import serverless from 'serverless-http';
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ... [Previous endpoints remain unchanged] ...
+// ... [Endpoints remain unchanged] ...
 app.get('/', (req, res) => {
   res.json({
     success: true,
@@ -152,7 +152,7 @@ app.use((req, res) => {
 });
 
 // For local direct execution
-if (typeof process !== 'undefined' && process.env && !process.env.CLOUDFLARE_WORKER) {
+if (process.env.NODE_ENV !== 'production' && !process.env.CLOUDFLARE_WORKER) {
   app.listen(port, () => {
     console.log(`Dummy test server listening at http://localhost:${port}`);
   });
@@ -160,7 +160,8 @@ if (typeof process !== 'undefined' && process.env && !process.env.CLOUDFLARE_WOR
 
 // Export for Cloudflare Workers
 const handler = serverless(app);
-module.exports = {
+
+export default {
   fetch: async (request, env, ctx) => {
     return await handler(request, env, ctx);
   }

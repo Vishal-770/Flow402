@@ -199,7 +199,7 @@ export default function ApiEndpointsPage() {
                     <TableCell className="pl-6 py-4">
                       <div className="flex flex-col gap-0.5">
                         <span className="font-mono text-xs text-primary font-bold">
-                          /{ep.gatewayPath}
+                          /{ep.gatewayPath.replace(/^\//, "")}
                         </span>
                         {ep.description && (
                           <p className="text-xs text-muted-foreground truncate max-w-[200px] font-medium">

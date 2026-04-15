@@ -35,8 +35,8 @@ async function bootstrap() {
 
   const port = process.env.PORT ?? 4000;
 
-  // Start the server if running locally
-  if (process.env.NODE_ENV !== 'production') {
+  // Start the server if not explicitly inhibited
+  if (process.env.VERCEL !== '1') {
     await app.listen(port);
     console.log(`[Flow402] Registry Backend live at http://localhost:${port}`);
   } else {
