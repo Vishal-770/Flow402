@@ -194,9 +194,10 @@ export class GatewayService {
       if (paymentData) {
         try {
           // Try to extract wallet from x-payment header (usually contains payment intent/proof)
-          const parsed = JSON.parse(paymentData);
-          callerWallet = parsed.sender || parsed.signer || 'unknown';
-        } catch (e) {
+          const parsed = JSON.parse(paymentData) as Record<string, unknown>;
+          callerWallet =
+            (parsed.sender as string) || (parsed.signer as string) || 'unknown';
+        } catch {
           // Not JSON or missing fields, keep unknown
         }
       }
@@ -306,8 +307,8 @@ export class GatewayService {
             method: req.method,
             url: targetUrl,
             headers: upstreamHeaders,
-            data: req.body,
-            params: req.query,
+            data: req.body as unknown,
+            params: req.query as Record<string, unknown>,
             validateStatus: () => true, // Allow all statuses to pass through
           });
 

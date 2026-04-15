@@ -6,7 +6,7 @@ import { Express } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
   // Security Hardening
   app.use(helmet());
   app.enableCors({
@@ -32,11 +32,13 @@ async function bootstrap() {
   );
 
   const port = process.env.PORT ?? 4000;
-  
+
   // Conditionally listen for local development
   if (process.env.NODE_ENV !== 'production') {
     await app.listen(port);
-    console.log(`[Flow402] Registry Backend live at http://localhost:${port}/api`);
+    console.log(
+      `[Flow402] Registry Backend live at http://localhost:${port}/api`,
+    );
   }
 
   await app.init();
@@ -46,7 +48,10 @@ async function bootstrap() {
 
 // For local direct execution
 if (process.env.NODE_ENV !== 'production') {
-  bootstrap();
+  void bootstrap().catch((err) => {
+    console.error('[Flow402] Fatal during bootstrap:', err);
+    process.exit(1);
+  });
 }
 
 // Export for Vercel serverless

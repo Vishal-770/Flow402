@@ -16,7 +16,9 @@ export class GatewayController {
     // Safely reconstruct the remaining path from string or array
     let path = '';
     if (typeof remainingPath === 'string') {
-      path = remainingPath.startsWith('/') ? remainingPath : `/${remainingPath}`;
+      path = remainingPath.startsWith('/')
+        ? remainingPath
+        : `/${remainingPath}`;
     } else if (Array.isArray(remainingPath)) {
       path = '/' + remainingPath.join('/');
     }
