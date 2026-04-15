@@ -13,7 +13,7 @@ import { ThirdwebService } from '../thirdweb/thirdweb.service';
 import { settlePayment } from 'thirdweb/x402';
 import { defineChain } from 'thirdweb/chains';
 import axios from 'axios';
-import type { Request, Response } from 'express';
+import { Request, Response } from 'express';
 import * as crypto from 'crypto';
 
 function getErrorMessage(error: unknown): string {
@@ -36,7 +36,7 @@ function getHeaderValue(
 }
 
 function setHeaders(
-  res: Response,
+  res: any,
   headers: Record<string, unknown> | undefined,
 ): void {
   if (!headers) {
@@ -125,8 +125,8 @@ export class GatewayService {
   async handleProxy(
     gatewayPath: string,
     remainingPath: string,
-    req: Request,
-    res: Response,
+    req: any,
+    res: any,
   ) {
     const startTime = Date.now();
     let callerWallet = 'unknown';

@@ -10,6 +10,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ... [Previous endpoints remain unchanged] ...
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: "Flow402 Test API is operational",
+    endpoints: ["/user", "/echo", "/status", "/v1/auth/validate", "/v1/transactions/create", "/v1/market/prices", "/v1/analytics/report", "/v1/infrastructure/config/:region"]
+  });
+});
+
 app.get('/user', (req, res) => {
   const userId = req.query.id || 'unknown';
   res.json({

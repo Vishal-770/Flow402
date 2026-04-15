@@ -11,13 +11,24 @@ export class AppService {
     private readonly db: NodePgDatabase<typeof schema>,
   ) {}
 
-  async getHello(): Promise<string> {
+  async getStatus() {
     try {
       const result = await this.db.select({ count: count() }).from(schema.user);
-      return `Hello World! Database connected. Total users: ${result[0].count}`;
+      return {
+        status: 'online',
+        database: 'connected',
+        users_count: result[0].count,
+        version: '1.0.0',
+        timestamp: new Date().toISOString(),
+      };
     } catch (error) {
       console.error('Database connection failed', error);
-      return 'Hello World! Database connection failed.';
+      return {
+        status: 'online',
+        database: 'disconnected',
+        error: 'Database connection failed',
+        timestamp: new Date().toISOString(),
+      };
     }
   }
 }
