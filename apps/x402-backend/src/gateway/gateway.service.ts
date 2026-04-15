@@ -152,12 +152,12 @@ export class GatewayService {
           payTo: schema.wallets.address,
         })
         .from(schema.apiEndpoints)
-        .innerJoin(
+        .leftJoin(
           schema.tokens,
           eq(schema.apiEndpoints.tokenId, schema.tokens.id),
         )
-        .innerJoin(schema.chains, eq(schema.tokens.chainId, schema.chains.id))
-        .innerJoin(
+        .leftJoin(schema.chains, eq(schema.tokens.chainId, schema.chains.id))
+        .leftJoin(
           schema.wallets,
           eq(schema.apiEndpoints.walletId, schema.wallets.id),
         )
@@ -168,6 +168,14 @@ export class GatewayService {
               sql`LOWER(${schema.apiEndpoints.gatewayPath})`,
               `/${lowSearchPath}`,
             ),
+            eq(
+              sql`LOWER(${schema.apiEndpoints.gatewayPath})`,
+              `/api/${lowSearchPath}`,
+            ),
+            eq(
+              sql`LOWER(${schema.apiEndpoints.gatewayPath})`,
+              `api/${lowSearchPath}`,
+            ),
           ),
         )
         .limit(1);
@@ -175,6 +183,13 @@ export class GatewayService {
       if (!endpoint) {
         throw new NotFoundException(
           `API Endpoint with path ${gatewayPath} not found.`,
+        );
+      }
+
+      // Check if joins failed
+      if (!endpoint.assetAddress || !endpoint.payTo || !endpoint.chainId) {
+        throw new InternalServerErrorException(
+          `API Endpoint /${searchPath} configuration is incomplete (missing token, wallet, or chain mapping).`,
         );
       }
 
