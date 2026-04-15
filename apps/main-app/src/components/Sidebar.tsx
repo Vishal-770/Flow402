@@ -18,6 +18,7 @@ import {
 import { cn } from "@/src/lib/utils";
 import { Button } from "@/src/components/ui/button";
 import { Separator } from "@/src/components/ui/separator";
+import BackendStatus from "./BackendStatus";
 
 const navLinks = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -100,7 +101,9 @@ const Sidebar = () => {
       </div>
 
       {/* Footer */}
-      <div className="p-3 border-t border-border">
+      <div className="p-3 border-t border-border space-y-3">
+        <BackendStatus />
+        
         <div className="p-3 rounded-lg bg-muted/50 border border-border space-y-3">
           <div className="flex items-center gap-2 px-1">
             <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />

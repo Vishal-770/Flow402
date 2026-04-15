@@ -8,7 +8,17 @@ describe('AppController', () => {
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
       controllers: [AppController],
-      providers: [AppService],
+      providers: [
+        AppService,
+        {
+          provide: 'DRIZZLE',
+          useValue: {
+            select: jest.fn().mockReturnValue({
+              from: jest.fn().mockReturnValue([]),
+            }),
+          },
+        },
+      ],
     }).compile();
 
     appController = app.get<AppController>(AppController);
