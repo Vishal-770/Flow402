@@ -130,125 +130,118 @@ export default function ApiEndpointsPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto py-10 px-6">
+    <div className="max-w-7xl mx-auto pt-12 pb-24 px-4 md:px-6">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 mb-8">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-12">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Code2 className="h-5 w-5 text-muted-foreground" />
-            <h1 className="text-2xl font-bold tracking-tight">
-              My API Listings
-            </h1>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Manage and monitor your endpoints registered on the marketplace.
+          <h1 className="text-4xl font-extrabold tracking-tight mb-2">My Endpoints</h1>
+          <p className="text-muted-foreground font-medium">
+            Manage your registered API listings and control access in real-time.
           </p>
         </div>
         <Link href="/api-endpoints/create">
-          <Button size="sm" className="rounded-lg gap-1.5">
+          <Button className="rounded-xl px-6 font-bold shadow-sm flex items-center gap-2">
             <Plus className="h-4 w-4" />
-            Register API
+            Register New API
           </Button>
         </Link>
       </div>
 
-      <Card>
-        <CardHeader className="pb-3">
+      <div className="border border-border bg-background rounded-2xl overflow-hidden shadow-sm">
+        <div className="p-6 border-b border-border bg-muted/20">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base font-semibold flex items-center gap-2">
-              All Endpoints
-              <Badge variant="secondary" className="rounded-md tabular-nums text-xs">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+              Registered Listings
+              <Badge variant="secondary" className="rounded-md tabular-nums px-2 py-0.5 bg-background border border-border text-[10px] font-bold">
                 {endpointsList.length}
               </Badge>
-            </CardTitle>
+            </h2>
           </div>
-        </CardHeader>
-        <Separator />
-        <CardContent className="p-0">
-          {endpointsQuery.isLoading ? (
-            <div className="flex justify-center items-center py-16">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-            </div>
-          ) : endpointsList.length === 0 ? (
-            <div className="text-center py-16 px-6">
-              <Code2 className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
-              <p className="text-sm font-medium mb-1">No endpoints yet</p>
-              <p className="text-sm text-muted-foreground mb-5">
-                Register your first API to get started.
-              </p>
-              <Link href="/api-endpoints/create">
-                <Button size="sm" className="rounded-lg">
-                  Register API
-                </Button>
-              </Link>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead className="pl-5">Gateway Path</TableHead>
-                    <TableHead className="hidden sm:table-cell">
-                      Category
-                    </TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead className="hidden md:table-cell">
-                      Wallet
-                    </TableHead>
-                    <TableHead>Active</TableHead>
-                    <TableHead className="text-right pr-5">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {endpointsList.map((ep) => (
-                    <TableRow key={ep.id}>
-                      <TableCell className="pl-5">
-                        <div>
-                          <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded border border-border">
-                            {ep.gatewayPath}
-                          </span>
-                          {ep.description && (
-                            <p className="text-xs text-muted-foreground mt-1 truncate max-w-[180px]">
-                              {ep.description}
-                            </p>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="hidden sm:table-cell">
-                        {ep.category ? (
-                          <Badge variant="secondary" className="rounded text-xs">
-                            {ep.category}
-                          </Badge>
-                        ) : (
-                          <span className="text-muted-foreground">—</span>
+        </div>
+
+        {endpointsQuery.isLoading ? (
+          <div className="flex justify-center items-center py-24">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          </div>
+        ) : endpointsList.length === 0 ? (
+          <div className="text-center py-24 px-6">
+            <Code2 className="h-12 w-12 text-muted-foreground/20 mx-auto mb-4" />
+            <h3 className="text-lg font-bold text-foreground mb-1">No endpoints registered</h3>
+            <p className="text-sm text-muted-foreground mb-8 max-w-xs mx-auto">
+              Ready to monetize your high-availability APIs? Start by registering your first endpoint.
+            </p>
+            <Link href="/api-endpoints/create">
+              <Button variant="outline" className="rounded-xl px-8">
+                Get Started
+              </Button>
+            </Link>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader className="bg-muted/50">
+                <TableRow className="hover:bg-transparent border-border">
+                  <TableHead className="pl-6 py-4 h-auto text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Gateway Path</TableHead>
+                  <TableHead className="hidden sm:table-cell py-4 h-auto text-[10px] uppercase font-bold tracking-widest text-muted-foreground">
+                    Category
+                  </TableHead>
+                  <TableHead className="py-4 h-auto text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Pricing</TableHead>
+                  <TableHead className="hidden md:table-cell py-4 h-auto text-[10px] uppercase font-bold tracking-widest text-muted-foreground">
+                    Payout Wallet
+                  </TableHead>
+                  <TableHead className="py-4 h-auto text-[10px] uppercase font-bold tracking-widest text-muted-foreground text-center">Status</TableHead>
+                  <TableHead className="text-right pr-6 py-4 h-auto text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {endpointsList.map((ep) => (
+                  <TableRow key={ep.id} className="group hover:bg-muted/30 border-border transition-colors">
+                    <TableCell className="pl-6 py-4">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-mono text-xs text-primary font-bold">
+                          /{ep.gatewayPath}
+                        </span>
+                        {ep.description && (
+                          <p className="text-xs text-muted-foreground truncate max-w-[200px] font-medium">
+                            {ep.description}
+                          </p>
                         )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          <span className="font-mono font-medium">
-                            {formatUnits(ep.priceAmount, ep.tokenDecimals ?? 18)}
-                          </span>
-                          <span className="text-xs text-muted-foreground ml-1 uppercase">
-                            {ep.tokenSymbol ?? ""}
-                          </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell py-4">
+                      {ep.category ? (
+                        <Badge variant="outline" className="rounded-lg text-[10px] font-bold bg-secondary/30 border-border px-2">
+                          {ep.category}
+                        </Badge>
+                      ) : (
+                        <span className="text-muted-foreground text-xs">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="py-4">
+                      <div className="flex flex-col">
+                        <div className="text-xs font-bold">
+                          {formatUnits(ep.priceAmount, ep.tokenDecimals ?? 18)}
+                          <span className="ml-1 uppercase text-[10px] text-muted-foreground">{ep.tokenSymbol ?? ""}</span>
                         </div>
                         {ep.chainName && (
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-[10px] text-muted-foreground font-medium">
                             {ep.chainName}
                           </span>
                         )}
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        {ep.walletAddress ? (
-                          <span className="font-mono text-xs text-muted-foreground">
-                            {ep.walletAddress.slice(0, 6)}…
-                            {ep.walletAddress.slice(-4)}
-                          </span>
-                        ) : (
-                          <span className="text-muted-foreground">—</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell py-4">
+                      {ep.walletAddress ? (
+                        <span className="font-mono text-[10px] text-muted-foreground font-medium uppercase bg-muted/50 px-2 py-0.5 rounded border border-border/50">
+                          {ep.walletAddress.slice(0, 6)}…
+                          {ep.walletAddress.slice(-4)}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground text-xs">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="py-4 text-center">
+                      <div className="flex justify-center">
                         <Switch
                           checked={ep.isActive}
                           onCheckedChange={(checked) =>
@@ -257,87 +250,79 @@ export default function ApiEndpointsPage() {
                               isActive: checked,
                             })
                           }
+                          className="scale-90"
                         />
-                      </TableCell>
-                      <TableCell className="text-right pr-5">
-                        <div className="flex justify-end gap-1.5">
-                          {ep.docsUrl && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
-                              asChild
-                            >
-                              <a
-                                href={ep.docsUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <ExternalLink className="h-3.5 w-3.5" />
-                              </a>
-                            </Button>
-                          )}
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
-                            asChild
-                          >
-                            <Link href={`/api-endpoints/${ep.id}/analytics`}>
-                              <BarChart3 className="h-3.5 w-3.5" />
-                            </Link>
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
-                            asChild
-                          >
-                            <Link href={`/api-endpoints/${ep.id}/edit`}>
-                              <Pencil className="h-3.5 w-3.5" />
-                            </Link>
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                            onClick={() => openDelete(ep)}
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right pr-6 py-4">
+                      <div className="flex justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-background border-none transition-all"
+                          asChild
+                          title="View Analytics"
+                        >
+                          <Link href={`/api-endpoints/${ep.id}/analytics`}>
+                            <BarChart3 className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-background border-none transition-all"
+                          asChild
+                          title="Edit Details"
+                        >
+                          <Link href={`/api-endpoints/${ep.id}/edit`}>
+                            <Pencil className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 border-none transition-all"
+                          onClick={() => openDelete(ep)}
+                          title="Delete Endpoint"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </div>
 
       {/* Delete Dialog */}
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-2xl border-border bg-background">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete API Endpoint</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete{" "}
-              <code className="font-mono text-xs bg-muted px-1 py-0.5 rounded border border-border">
-                {deletePath}
+            <AlertDialogTitle className="text-xl font-extrabold tracking-tight">Revoke API Listing?</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground font-medium">
+              You are about to permanently delete the listing for{" "}
+              <code className="font-mono text-xs bg-muted px-2 py-0.5 rounded border border-border font-bold text-primary">
+                /{deletePath}
               </code>
-              ? This action cannot be undone.
+              . This will immediately stop all billing and marketplace traffic. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel className="rounded-xl border-border font-bold">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 if (deleteId) deleteMutation.mutate(deleteId);
               }}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-red-500 text-white hover:bg-red-600 rounded-xl font-bold border-none"
             >
-              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+              {deleteMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Confirm Deletion"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

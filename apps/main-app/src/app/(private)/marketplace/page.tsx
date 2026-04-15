@@ -28,7 +28,6 @@ import {
 import { Separator } from "@/src/components/ui/separator";
 import {
   Search,
-  Loader2,
   Code2,
   Heart,
   X,
@@ -36,8 +35,9 @@ import {
   ArrowRight,
   ShoppingBag,
   Check,
-  Shield,
+  Loader2,
 } from "lucide-react";
+import Image from "next/image";
 import { formatUnits } from "@/src/lib/utils/units";
 import Link from "next/link";
 import { authClient } from "@/src/lib/auth-client";
@@ -127,11 +127,11 @@ export default function MarketplacePage() {
     },
   });
 
-  const allEndpoints = marketplaceQuery.data?.data ?? [];
+  const allEndpoints = useMemo(() => marketplaceQuery.data?.data ?? [], [marketplaceQuery.data]);
   const favorites = favoritesQuery.data?.data ?? [];
 
   const processedEndpoints = useMemo(() => {
-    let result = allEndpoints.filter((ep) => {
+    const result = allEndpoints.filter((ep) => {
       const matchesSearch =
         (ep.description?.toLowerCase() || "").includes(search.toLowerCase()) ||
         (ep.category?.toLowerCase() || "").includes(search.toLowerCase()) ||
@@ -358,11 +358,11 @@ export default function MarketplacePage() {
 
         {/* Listing Grid */}
         {marketplaceQuery.isLoading ? (
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+          <div className="space-y-2">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div
                 key={i}
-                className="h-56 rounded-xl bg-muted/30 border border-border animate-pulse"
+                className="h-24 rounded-xl bg-secondary/50 border border-border animate-pulse"
               />
             ))}
           </div>
@@ -389,21 +389,24 @@ export default function MarketplacePage() {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-            {processedEndpoints.map((ep) => (
-              <ApiCard
-                key={ep.id}
-                ep={ep}
-                isFavorite={favorites.includes(ep.id)}
-                onToggleFavorite={() => {
-                  if (!session) {
-                    toast.error("Sign in to save favorites.");
-                    return;
-                  }
-                  toggleFavoriteMutation.mutate(ep.id);
-                }}
-              />
-            ))}
+          <div className="rounded-xl border border-border overflow-hidden bg-background">
+            <div className="divide-y divide-border">
+              {processedEndpoints.map((ep) => (
+                <ApiCard
+                  key={ep.id}
+                  ep={ep}
+                  isFavorite={favorites.includes(ep.id)}
+                  isToggling={toggleFavoriteMutation.isPending && toggleFavoriteMutation.variables === ep.id}
+                  onToggleFavorite={() => {
+                    if (!session) {
+                      toast.error("Sign in to save favorites.");
+                      return;
+                    }
+                    toggleFavoriteMutation.mutate(ep.id);
+                  }}
+                />
+              ))}
+            </div>
           </div>
         )}
       </main>
@@ -414,150 +417,110 @@ export default function MarketplacePage() {
 function ApiCard({
   ep,
   isFavorite,
+  isToggling,
   onToggleFavorite,
 }: {
   ep: MarketplaceEndpoint;
   isFavorite: boolean;
+  isToggling?: boolean;
   onToggleFavorite: () => void;
 }) {
   return (
-    <Link href={`/marketplace/${ep.id}`} className="block group">
-      <Card className="flex flex-col md:flex-row h-auto md:h-56 rounded-xl border border-border bg-card overflow-hidden transition-colors hover:bg-accent/20 hover:border-primary/30">
+    <Link href={`/marketplace/${ep.id}`} className="block group w-full">
+      <div className="flex flex-col md:flex-row items-start md:items-center gap-5 p-5 hover:bg-secondary/30 transition-colors bg-background">
         {/* Thumbnail */}
-        <div className="w-full md:w-52 h-40 md:h-full relative overflow-hidden bg-muted border-b md:border-b-0 md:border-r border-border shrink-0">
+        <div className="w-16 h-16 rounded-xl bg-secondary/50 flex items-center justify-center shrink-0 overflow-hidden border border-border relative group-hover:border-primary/30 transition-colors">
           {ep.imageUrl ? (
-            <img
+            <Image
               src={ep.imageUrl}
-              alt={ep.category || "API"}
-              className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+              alt={ep.category || "API Endpoint"}
+              width={64}
+              height={64}
+              className="w-full h-full object-contain p-2"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <Code2 className="h-8 w-8 text-muted-foreground/20" />
-            </div>
+             <Code2 className="h-6 w-6 text-muted-foreground opacity-50 relative z-10" />
           )}
+        </div>
 
-          {/* Category badge */}
-          <div className="absolute inset-0 p-3 flex justify-between items-start">
-            {ep.category && (
-              <div className="px-2 py-1 bg-background/90 border border-border backdrop-blur-sm rounded-md text-[10px] font-medium text-foreground">
-                {ep.category}
-              </div>
+        {/* Info */}
+        <div className="flex-1 min-w-0 flex flex-col gap-1.5 w-full">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-base font-bold text-foreground truncate group-hover:text-primary transition-colors max-w-full">
+              {ep.description || "API Endpoint"}
+            </span>
+            {ep.chainName && (
+               <Badge variant="outline" className="text-[10px] font-mono text-muted-foreground border-border bg-secondary/20 px-1.5 py-0 uppercase shrink-0">
+                 {ep.chainName}
+               </Badge>
             )}
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onToggleFavorite();
-              }}
-              className={cn(
-                "w-7 h-7 rounded-lg flex items-center justify-center bg-background/90 border border-border backdrop-blur-sm transition-colors ml-auto",
-                isFavorite
-                  ? "text-primary border-primary/30"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <Heart
-                className={cn("h-3.5 w-3.5", isFavorite && "fill-current")}
-              />
-            </button>
+            {ep.category && (
+               <Badge variant="outline" className="text-[10px] font-mono text-muted-foreground border-border bg-secondary/20 px-1.5 py-0 shrink-0">
+                 {ep.category}
+               </Badge>
+            )}
           </div>
+          
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+             <div className="flex items-center gap-1.5 font-medium">
+               <span className="font-bold text-foreground">
+                 {formatUnits(ep.priceAmount, ep.tokenDecimals ?? 18)}
+               </span>
+               <span className="uppercase">{ep.tokenSymbol}</span> per call
+             </div>
+             
+             {ep.providerName && (
+               <>
+                 <div className="w-1 h-1 rounded-full bg-border" />
+                 <span className="truncate max-w-[120px] font-medium">{ep.providerName}</span>
+               </>
+             )}
+          </div>
+
+          {/* Tags */}
+          {ep.tags && ep.tags.length > 0 && (
+             <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+               {ep.tags.slice(0, 4).map((tag) => (
+                  <span key={tag} className="text-[10px] font-mono text-muted-foreground bg-secondary/30 px-1.5 py-0.5 rounded border border-border/50">
+                    {tag.toLowerCase()}
+                  </span>
+               ))}
+               {ep.tags.length > 4 && (
+                  <span className="text-[10px] text-muted-foreground shrink-0">+{ep.tags.length - 4}</span>
+               )}
+             </div>
+          )}
         </div>
 
-        {/* Body */}
-        <div className="flex-1 grid grid-cols-1 md:grid-cols-[1fr,200px] min-w-0">
-          {/* Info */}
-          <CardContent className="p-5 flex flex-col gap-3 border-b md:border-b-0 md:border-r border-border min-w-0">
-            {/* Provider */}
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-md bg-muted border border-border flex items-center justify-center shrink-0 overflow-hidden">
-                {ep.providerImage ? (
-                  <img
-                    src={ep.providerImage}
-                    alt={ep.providerName || ""}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-[9px] font-bold text-muted-foreground">
-                    {ep.providerName?.[0] || "P"}
-                  </span>
-                )}
-              </div>
-              <span className="text-xs text-muted-foreground truncate">
-                {ep.providerName || "Anonymous Provider"}
-              </span>
-            </div>
-
-            {/* Title & description */}
-            <div className="space-y-1 flex-1">
-              <h3 className="text-base font-semibold leading-tight group-hover:text-primary transition-colors truncate">
-                {ep.description || "Experimental API"}
-              </h3>
-              <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                {ep.description ||
-                  "Standard documentation and high-performance access enabled."}
-              </p>
-            </div>
-
-            {/* Tags */}
-            <div className="flex items-center gap-1.5 flex-wrap">
-              {ep.tags.slice(0, 3).map((tag) => (
-                <Badge
-                  key={tag}
-                  variant="secondary"
-                  className="px-2 h-5 text-[10px] font-medium rounded"
-                >
-                  {tag}
-                </Badge>
-              ))}
-              {ep.tags.length > 3 && (
-                <span className="text-[10px] text-muted-foreground">
-                  +{ep.tags.length - 3}
-                </span>
-              )}
-            </div>
-          </CardContent>
-
-          {/* Action column */}
-          <div className="p-5 flex flex-col justify-between bg-muted/30 group-hover:bg-muted/50 transition-colors shrink-0">
-            <div className="space-y-4">
-              {/* Price */}
-              <div>
-                <p className="text-[10px] text-muted-foreground uppercase font-semibold tracking-wider mb-1">
-                  Price / Call
-                </p>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-xl font-bold tabular-nums">
-                    {formatUnits(ep.priceAmount, ep.tokenDecimals ?? 18)}
-                  </span>
-                  <span className="text-xs text-muted-foreground uppercase">
-                    {ep.tokenSymbol}
-                  </span>
-                </div>
-              </div>
-
-              {/* Network */}
-              {ep.chainName && (
-                <div>
-                  <p className="text-[10px] text-muted-foreground uppercase font-semibold tracking-wider mb-1">
-                    Network
-                  </p>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                    <span className="text-xs font-medium">{ep.chainName}</span>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* CTA */}
-            <div className="flex items-center justify-between mt-4 text-xs font-semibold text-primary group-hover:gap-2 transition-all">
-              View Details
-              <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
-            </div>
-          </div>
+        {/* Actions */}
+        <div className="flex sm:flex-row items-center gap-2 shrink-0 ml-auto w-full sm:w-auto mt-4 sm:mt-0 justify-end">
+          <Button
+             variant="ghost"
+             size="icon"
+             disabled={isToggling}
+             className={cn("h-9 w-9 rounded-md transition-colors", isFavorite ? "text-primary hover:text-primary hover:bg-primary/10" : "text-muted-foreground hover:text-foreground")}
+             onClick={(e) => {
+               e.preventDefault();
+               e.stopPropagation();
+               onToggleFavorite();
+             }}
+          >
+             {isToggling ? (
+               <Loader2 className="h-4 w-4 animate-spin opacity-50" />
+             ) : (
+               <Heart className={cn("h-4 w-4", isFavorite && "fill-current")} />
+             )}
+          </Button>
+          <Button
+             variant="secondary"
+             size="sm"
+             className="h-9 px-4 rounded-md text-xs font-semibold border border-border group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all w-full sm:w-auto mt-2 sm:mt-0"
+          >
+             View Details
+             <ArrowRight className="h-3.5 w-3.5 ml-1.5 group-hover:translate-x-0.5 transition-transform" />
+          </Button>
         </div>
-      </Card>
+      </div>
     </Link>
   );
 }

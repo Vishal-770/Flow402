@@ -28,6 +28,7 @@ export async function GET(
         rating: apiReviews.rating,
         comment: apiReviews.comment,
         createdAt: apiReviews.createdAt,
+        reviewerId: apiReviews.reviewerId,
         reviewerName: userTable.name,
         reviewerImage: userTable.image,
       })
@@ -122,6 +123,129 @@ export async function POST(
     }
 
     console.error("Error creating review:", error);
+    return NextResponse.json(
+      { success: false, message: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const user = await getAuthUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const json = await req.json();
+    const body = createReviewSchema.parse(json);
+
+    // Check if user already reviewed this API
+    const existingReview = await db
+      .select()
+      .from(apiReviews)
+      .where(
+        and(
+          eq(apiReviews.apiEndpointId, id),
+          eq(apiReviews.reviewerId, user.id)
+        )
+      )
+      .limit(1);
+
+    if (existingReview.length === 0) {
+      return NextResponse.json(
+        { success: false, message: "You have not reviewed this API yet" },
+        { status: 404 }
+      );
+    }
+
+    const now = new Date();
+
+    await db
+      .update(apiReviews)
+      .set({
+        rating: body.rating,
+        comment: body.comment,
+        updatedAt: now,
+      })
+      .where(
+        and(
+          eq(apiReviews.apiEndpointId, id),
+          eq(apiReviews.reviewerId, user.id)
+        )
+      );
+
+    return NextResponse.json({ success: true, id: existingReview[0].id }, { status: 200 });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { success: false, message: "Invalid input", errors: error.issues },
+        { status: 400 }
+      );
+    }
+
+    console.error("Error updating review:", error);
+    return NextResponse.json(
+      { success: false, message: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const user = await getAuthUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    // Check if user already reviewed this API
+    const existingReview = await db
+      .select()
+      .from(apiReviews)
+      .where(
+        and(
+          eq(apiReviews.apiEndpointId, id),
+          eq(apiReviews.reviewerId, user.id)
+        )
+      )
+      .limit(1);
+
+    if (existingReview.length === 0) {
+      return NextResponse.json(
+        { success: false, message: "Review not found" },
+        { status: 404 }
+      );
+    }
+
+    await db
+      .delete(apiReviews)
+      .where(
+        and(
+          eq(apiReviews.apiEndpointId, id),
+          eq(apiReviews.reviewerId, user.id)
+        )
+      );
+
+    return NextResponse.json({ success: true, message: "Review deleted" });
+  } catch (error) {
+    console.error("Error deleting review:", error);
     return NextResponse.json(
       { success: false, message: "Internal Server Error" },
       { status: 500 }

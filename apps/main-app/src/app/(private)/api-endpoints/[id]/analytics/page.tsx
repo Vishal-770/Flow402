@@ -6,18 +6,17 @@ import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import {
-  ArrowLeft,
   Activity,
   CheckCircle2,
   XCircle,
-  RefreshCw,
   Clock,
   DollarSign,
   BarChart3,
   Loader2,
   ExternalLink,
   ChevronLeft,
-  Code
+  Code,
+  Pencil
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/src/components/ui/card";
 import { Badge } from "@/src/components/ui/badge";
@@ -120,196 +119,168 @@ const ApiAnalyticsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20 pt-12">
-      <main className="max-w-7xl mx-auto px-6">
+    <div className="min-h-screen bg-background pb-24 pt-12">
+      <main className="max-w-7xl mx-auto px-4 md:px-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-12 gap-6">
-          <div>
+          <div className="space-y-4">
             <Link 
                 href="/api-endpoints" 
-                className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-primary mb-6 transition-colors group"
+                className="inline-flex items-center text-sm font-bold text-muted-foreground hover:text-foreground transition-colors group"
             >
                 <ChevronLeft className="mr-1 h-4 w-4 group-hover:-translate-x-1 transition-transform" />
                 Back to Listings
             </Link>
-            <div className="flex items-center gap-4 mb-2">
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
-                    <BarChart3 className="h-6 w-6 text-primary" />
-                </div>
-                <h1 className="text-4xl font-extrabold tracking-tight">API Analytics</h1>
-            </div>
-            <div className="flex items-center gap-2 mt-1">
-                <Badge variant="secondary" className="rounded-xl px-3 font-bold bg-muted/50">
-                    {endpointData?.gatewayPath}
+            <div className="flex items-center gap-4">
+                <h1 className="text-4xl font-extrabold tracking-tight">Analytics</h1>
+                <Badge variant="outline" className="rounded-lg px-3 py-1 font-mono text-xs font-bold border-primary/20 bg-primary/5 text-primary">
+                    /{endpointData?.gatewayPath}
                 </Badge>
-                <span className="text-muted-foreground text-sm font-medium">
-                    {endpointData?.description}
-                </span>
             </div>
+            <p className="text-muted-foreground font-medium max-w-2xl">
+                Real-time performance metrics and call history for your API endpoint.
+            </p>
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-2">
              <Link href={`/api-endpoints/${id}/edit`}>
-                <Button variant="outline" className="rounded-xl px-6">Edit Endpoint</Button>
+                <Button variant="outline" className="rounded-xl px-5 font-bold border-border hover:bg-muted/50">
+                  <Pencil className="mr-2 h-4 w-4" /> Edit Endpoint
+                </Button>
             </Link>
             <Link href={`/marketplace/${id}`}>
-                <Button variant="outline" className="rounded-xl px-6 flex items-center gap-2">
-                    <ExternalLink className="h-4 w-4" /> Marketplace View
+                <Button variant="outline" className="rounded-xl px-5 font-bold border-border hover:bg-muted/50">
+                   <ExternalLink className="mr-2 h-4 w-4" /> Marketplace View
                 </Button>
             </Link>
           </div>
         </div>
 
         {error ? (
-          <Card className="rounded-[3rem] p-12 text-center border-destructive/50 bg-destructive/5">
-            <XCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+          <div className="rounded-2xl p-12 text-center border border-border bg-background shadow-sm">
+            <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
             <h3 className="text-lg font-bold mb-2">Failed to load analytics</h3>
-            <p className="text-muted-foreground">Please try again later</p>
-          </Card>
+            <p className="text-muted-foreground font-medium">Please check your network connection and try again.</p>
+          </div>
         ) : !stats || stats.totalCalls === 0 ? (
-          <Card className="rounded-[3rem] p-24 text-center border-dashed bg-muted/10">
-            <Activity className="h-16 w-16 text-muted-foreground mx-auto mb-6 opacity-20" />
-            <h3 className="text-2xl font-black mb-2">No calls yet</h3>
-            <p className="text-muted-foreground max-w-md mx-auto leading-relaxed">
-                This API hasn't received any calls yet. Once it's used in the marketplace, you'll see detailed performance data here.
+          <div className="rounded-2xl p-24 text-center border border-dashed border-border bg-background">
+            <Activity className="h-12 w-12 text-muted-foreground/30 mx-auto mb-6" />
+            <h3 className="text-2xl font-bold mb-2">No data recorded yet</h3>
+            <p className="text-muted-foreground max-w-sm mx-auto leading-relaxed font-medium">
+                This API hasn&apos;t received any marketplace calls. Use the marketplace view to test your integration.
             </p>
-          </Card>
+          </div>
         ) : (
           <>
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-              <Card className="rounded-[2.5rem] border-border/50 bg-card/50 backdrop-blur-sm group hover:border-primary/20 transition-all">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-xs uppercase tracking-widest font-black text-muted-foreground flex items-center gap-2">
-                    <Activity className="h-3 w-3 text-blue-500" />
-                    Total Calls
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-4xl font-black">{stats.totalCalls.toLocaleString()}</div>
-                  <p className="text-[10px] uppercase font-bold text-muted-foreground mt-2 flex items-center gap-1">
-                    All-time usage history
-                  </p>
-                </CardContent>
-              </Card>
+              <div className="rounded-2xl border border-border bg-background p-6 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <Activity className="h-4 w-4 text-blue-500" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Total Requests</span>
+                </div>
+                <div className="text-3xl font-bold tracking-tight">{stats.totalCalls.toLocaleString()}</div>
+                <div className="mt-2 text-[10px] font-bold text-muted-foreground uppercase">Lifetime calls recorded</div>
+              </div>
 
-              <Card className="rounded-[2.5rem] border-border/50 bg-card/50 backdrop-blur-sm group hover:border-primary/20 transition-all">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-xs uppercase tracking-widest font-black text-muted-foreground flex items-center gap-2">
-                    <CheckCircle2 className="h-3 w-3 text-green-500" />
-                    Success Rate
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-4xl font-black">{successRate}%</div>
-                  <p className="text-[10px] uppercase font-bold text-muted-foreground mt-2">
-                    {stats.successCalls.toLocaleString()} successful calls
-                  </p>
-                </CardContent>
-              </Card>
+              <div className="rounded-2xl border border-border bg-background p-6 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Success Rate</span>
+                </div>
+                <div className="text-3xl font-bold tracking-tight">{successRate}%</div>
+                <div className="mt-2 text-[10px] font-bold text-muted-foreground uppercase">{stats.successCalls.toLocaleString()} passed</div>
+              </div>
 
-              <Card className="rounded-[2.5rem] border-border/50 bg-card/50 backdrop-blur-sm group hover:border-primary/20 transition-all">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-xs uppercase tracking-widest font-black text-muted-foreground flex items-center gap-2">
-                    <Clock className="h-3 w-3 text-amber-500" />
-                    Avg Latency
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-4xl font-black">
-                    {stats.avgLatency ? `${Math.round(Number(stats.avgLatency))}ms` : "N/A"}
-                  </div>
-                  <p className="text-[10px] uppercase font-bold text-muted-foreground mt-2">
-                    Response time performance
-                  </p>
-                </CardContent>
-              </Card>
+              <div className="rounded-2xl border border-border bg-background p-6 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <Clock className="h-4 w-4 text-amber-500" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">P95 Latency</span>
+                </div>
+                <div className="text-3xl font-bold tracking-tight">
+                    {stats.avgLatency ? `${Math.round(Number(stats.avgLatency))}ms` : "—"}
+                </div>
+                <div className="mt-2 text-[10px] font-bold text-muted-foreground uppercase">Response performance</div>
+              </div>
 
-              <Card className="rounded-[2.5rem] border-border/50 bg-card/50 backdrop-blur-sm group hover:border-primary/20 transition-all">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-xs uppercase tracking-widest font-black text-muted-foreground flex items-center gap-2">
-                    <DollarSign className="h-3 w-3 text-primary" />
-                    Total Revenue
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-4xl font-black">
+              <div className="rounded-2xl border border-border bg-background p-6 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <DollarSign className="h-4 w-4 text-primary" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Settled Revenue</span>
+                </div>
+                <div className="text-3xl font-bold tracking-tight">
                     {formatUnits(stats.totalRevenue, 6)}
-                  </div>
-                  <p className="text-[10px] uppercase font-bold text-muted-foreground mt-2 flex items-center gap-1">
-                    USDC earnings generated
-                  </p>
-                </CardContent>
-              </Card>
+                </div>
+                <div className="mt-2 text-[10px] font-bold text-muted-foreground uppercase">Earnings generated (USDC)</div>
+              </div>
             </div>
 
             {/* Recent API Calls */}
-            <Card className="rounded-[3rem] border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden">
-              <CardHeader className="p-8 pb-4">
-                <CardTitle className="flex items-center gap-3 text-2xl font-black leading-none tracking-tight">
-                  <Code className="h-6 w-6 text-primary" />
-                  Recent Call History
-                  <Badge variant="secondary" className="ml-auto rounded-xl px-4 py-1.5 font-bold">
-                    Showing last {calls.length} calls
+            <div className="rounded-2xl border border-border bg-background shadow-sm overflow-hidden">
+              <div className="p-8 border-b border-border bg-muted/20">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-2xl font-bold tracking-tight mb-1">Call Logs</h2>
+                    <p className="text-sm text-muted-foreground font-medium">Real-time transmission history for this listing.</p>
+                  </div>
+                  <Badge variant="secondary" className="w-fit rounded-lg px-3 py-1 font-bold bg-background border border-border text-xs">
+                    Latest {calls.length} entries
                   </Badge>
-                </CardTitle>
-                <CardDescription className="text-base font-medium mt-2">Detailed log of all requests transmitted through this API endpoint.</CardDescription>
-              </CardHeader>
-              <CardContent className="p-0 border-t border-border/50">
+                </div>
+              </div>
+              <div className="p-0">
                 <div className="overflow-x-auto">
                   <Table>
-                    <TableHeader className="bg-muted/30">
-                      <TableRow className="hover:bg-transparent border-border/50">
-                        <TableHead className="px-8 py-5 h-auto text-[10px] uppercase font-black tracking-widest">Caller</TableHead>
-                        <TableHead className="py-5 h-auto text-[10px] uppercase font-black tracking-widest text-center">Status</TableHead>
-                        <TableHead className="py-5 h-auto text-[10px] uppercase font-black tracking-widest text-right">Latency</TableHead>
-                        <TableHead className="py-5 h-auto text-[10px] uppercase font-black tracking-widest text-right">Price Paid</TableHead>
-                        <TableHead className="py-5 h-auto text-[10px] uppercase font-black tracking-widest">Time (UTC)</TableHead>
-                        <TableHead className="px-8 py-5 h-auto text-[10px] uppercase font-black tracking-widest">Error Detail</TableHead>
+                    <TableHeader className="bg-muted/50">
+                      <TableRow className="hover:bg-transparent border-border">
+                        <TableHead className="px-8 py-4 h-auto text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Caller</TableHead>
+                        <TableHead className="py-4 h-auto text-[10px] uppercase font-bold tracking-widest text-muted-foreground text-center">Status</TableHead>
+                        <TableHead className="py-4 h-auto text-[10px] uppercase font-bold tracking-widest text-muted-foreground text-right">Latency</TableHead>
+                        <TableHead className="py-4 h-auto text-[10px] uppercase font-bold tracking-widest text-muted-foreground text-right">Price</TableHead>
+                        <TableHead className="py-4 h-auto text-[10px] uppercase font-bold tracking-widest text-muted-foreground px-8">Time (UTC)</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {calls.map((call) => (
-                        <TableRow key={call.id} className="hover:bg-muted/20 border-border/50 transition-colors">
-                          <TableCell className="px-8 font-mono text-sm font-bold text-primary/80">
-                            {truncateAddress(call.callerWallet)}
+                        <TableRow key={call.id} className="hover:bg-muted/30 border-border group transition-colors">
+                          <TableCell className="px-8 py-4">
+                            <span className="font-mono text-xs font-bold text-primary bg-primary/5 px-2 py-0.5 rounded border border-primary/10">
+                                {truncateAddress(call.callerWallet)}
+                            </span>
                           </TableCell>
-                          <TableCell className="text-center">
+                          <TableCell className="text-center py-4">
                             {call.status === "success" && (
-                              <Badge className="bg-green-500/10 text-green-500 border-green-500/20 rounded-xl px-3 py-1 font-bold">
+                              <Badge className="bg-green-500/10 text-green-600 border-green-500/20 rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
                                 Success
                               </Badge>
                             )}
                             {call.status === "failed" && (
-                              <Badge className="bg-red-500/10 text-red-500 border-red-500/20 rounded-xl px-3 py-1 font-bold">
+                              <Badge className="bg-red-500/10 text-red-600 border-red-500/20 rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
                                 Failed
                               </Badge>
                             )}
                             {call.status === "refunded" && (
-                              <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 rounded-xl px-3 py-1 font-bold">
+                              <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
                                 Refunded
                               </Badge>
                             )}
                           </TableCell>
-                          <TableCell className="text-right font-black text-sm">
-                            {call.latencyMs ? `${call.latencyMs}ms` : "-"}
+                          <TableCell className="text-right py-4 font-bold text-xs tabular-nums">
+                            {call.latencyMs ? `${call.latencyMs}ms` : "—"}
                           </TableCell>
-                          <TableCell className="text-right font-black text-sm">
+                          <TableCell className="text-right py-4 font-bold text-xs tabular-nums">
                             {formatUnits(call.priceAmount, 6)} <span className="text-[10px] text-muted-foreground uppercase">USDC</span>
                           </TableCell>
-                          <TableCell className="text-xs font-bold text-muted-foreground">
+                          <TableCell className="px-8 py-4 text-xs font-bold text-muted-foreground tabular-nums">
                             {formatDate(call.createdAt)}
-                          </TableCell>
-                          <TableCell className="px-8 max-w-[300px] truncate text-xs font-bold text-destructive">
-                            {call.errorMessage || "-"}
                           </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
                   </Table>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </>
         )}
       </main>
@@ -318,3 +289,7 @@ const ApiAnalyticsPage = () => {
 };
 
 export default ApiAnalyticsPage;
+
+
+
+
