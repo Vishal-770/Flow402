@@ -19,7 +19,8 @@ export default function BackendStatus() {
 
   const fetchStatus = async () => {
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_GATEWAY_URL?.replace("/gw", "") || "http://localhost:4000";
+      const rawUrl = process.env.NEXT_PUBLIC_GATEWAY_URL?.replace("/gw", "") || "http://localhost:4000";
+      const baseUrl = rawUrl.replace(/['"]/g, "");
       const res = await axios.get(baseUrl, { timeout: 5000 });
       setData(res.data);
       setError(false);

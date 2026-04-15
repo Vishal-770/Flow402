@@ -8,7 +8,10 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Security Hardening
-  app.use(helmet());
+  app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+  }));
+  
   app.enableCors({
     origin: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
@@ -32,26 +35,20 @@ async function bootstrap() {
 
   const port = process.env.PORT ?? 4000;
 
-  // Conditionally listen for local development
+  // Start the server if running locally
   if (process.env.NODE_ENV !== 'production') {
     await app.listen(port);
-    console.log(
-      `[Flow402] Registry Backend live at http://localhost:${port}/api`,
-    );
+    console.log(`[Flow402] Registry Backend live at http://localhost:${port}`);
+  } else {
+    // For serverless/Vercel environments
+    await app.init();
   }
 
-  await app.init();
-  const expressApp = app.getHttpAdapter().getInstance() as Express;
-  return expressApp;
+  return app.getHttpAdapter().getInstance() as Express;
 }
 
-// For local direct execution
-if (process.env.NODE_ENV !== 'production') {
-  void bootstrap().catch((err) => {
-    console.error('[Flow402] Fatal during bootstrap:', err);
-    process.exit(1);
-  });
-}
+// Ensure bootstrap is called exactly once
+const server = bootstrap();
 
-// Export for Vercel serverless
-export default bootstrap();
+// Export the server instance for Vercel
+export default server;
