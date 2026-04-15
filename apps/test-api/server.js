@@ -1,13 +1,15 @@
 const express = require('express');
 const cors = require('cors');
+const serverless = require('serverless-http');
 
 const app = express();
-const port = 3001;
+const port = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ... [Previous endpoints remain unchanged] ...
 app.get('/user', (req, res) => {
   const userId = req.query.id || 'unknown';
   res.json({
@@ -41,7 +43,6 @@ app.get('/status', (req, res) => {
 
 // ─── Phase 3: Dummy Infrastructure Endpoints ───────────────────────────────
 
-// 1. Identity Verification (Headers + Response Switching)
 app.get('/v1/auth/validate', (req, res) => {
   const auth = req.headers.authorization;
   if (!auth) {
@@ -64,7 +65,6 @@ app.get('/v1/auth/validate', (req, res) => {
   });
 });
 
-// 2. Transaction Simulation (Body + Validation)
 app.post('/v1/transactions/create', (req, res) => {
   const { amount, to, symbol } = req.body;
   
@@ -84,7 +84,6 @@ app.post('/v1/transactions/create', (req, res) => {
   });
 });
 
-// 3. Market Oracle (Complex Query + Dynamic List)
 app.get('/v1/market/prices', (req, res) => {
   const tokens = (req.query.tokens || "ETH,USDC,DAI").split(',');
   const prices = tokens.map(t => ({
@@ -100,7 +99,6 @@ app.get('/v1/market/prices', (req, res) => {
   });
 });
 
-// 4. Analytics Collector (Headers + Body)
 app.post('/v1/analytics/report', (req, res) => {
   const appId = req.headers['x-app-id'] || 'anonymous';
   const events = req.body.events || [];
@@ -113,7 +111,6 @@ app.post('/v1/analytics/report', (req, res) => {
   });
 });
 
-// 5. Regional Config (Path Parameters)
 app.get('/v1/infrastructure/config/:region', (req, res) => {
   const { region } = req.params;
   const config = {
@@ -139,12 +136,6 @@ app.use((req, res) => {
     timestamp: new Date().toISOString(),
   };
 
-  console.log(`[${info.timestamp}] ${info.method} ${info.path}`);
-  console.log('Headers:', JSON.stringify(info.headers, null, 2));
-  console.log('Query:', JSON.stringify(info.query, null, 2));
-  console.log('Body:', JSON.stringify(info.body, null, 2));
-  console.log('-------------------------------------------');
-
   res.status(200).json({
     success: true,
     message: "Default Catch-all Echo",
@@ -152,6 +143,17 @@ app.use((req, res) => {
   });
 });
 
-app.listen(port, () => {
-  console.log(`Dummy test server listening at http://localhost:${port}`);
-});
+// For local direct execution
+if (typeof process !== 'undefined' && process.env && !process.env.CLOUDFLARE_WORKER) {
+  app.listen(port, () => {
+    console.log(`Dummy test server listening at http://localhost:${port}`);
+  });
+}
+
+// Export for Cloudflare Workers
+const handler = serverless(app);
+module.exports = {
+  fetch: async (request, env, ctx) => {
+    return await handler(request, env, ctx);
+  }
+};

@@ -1,0 +1,7 @@
+name = "flow402-test-api"
+main = "server.js"
+compatibility_date = "2026-04-16"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+PORT = "3001"
