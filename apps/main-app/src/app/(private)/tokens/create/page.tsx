@@ -4,8 +4,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
+import { useIsAdmin } from "@/src/lib/use-is-admin";
 import { createTokenSchema, type CreateTokenInput } from "@/src/lib/validators/token";
 import { uploadImage } from "@/src/lib/upload";
 import { Button } from "@/src/components/ui/button";
@@ -27,6 +28,7 @@ import {
 } from "@/src/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card";
 import { toast } from "sonner";
+import Image from "next/image";
 
 interface ChainOption {
   id: string;
@@ -42,7 +44,14 @@ interface ChainsApiResponse {
 
 export default function CreateTokenPage() {
   const router = useRouter();
+  const isAdmin = useIsAdmin();
   const [isUploading, setIsUploading] = useState(false);
+
+  useEffect(() => {
+    if (isAdmin === false) {
+      router.replace("/tokens");
+    }
+  }, [isAdmin, router]);
 
   const {
     data: chainsData,
@@ -237,9 +246,11 @@ export default function CreateTokenPage() {
                     />
                     {form.watch("imageUri") && (
                       <div className="relative w-12 h-12 rounded-full overflow-hidden border">
-                        <img
-                          src={form.watch("imageUri")}
+                        <Image
+                          src={form.watch("imageUri") || ""}
                           alt="Token Icon"
+                          width={48}
+                          height={48}
                           className="w-full h-full object-cover"
                         />
                       </div>

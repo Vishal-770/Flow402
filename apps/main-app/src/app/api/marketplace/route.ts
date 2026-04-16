@@ -7,7 +7,7 @@ import {
   user,
   apiTags,
 } from "@/src/drizzle/schema";
-import { eq, and, inArray } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 
 export async function GET() {
   try {

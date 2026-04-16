@@ -5,7 +5,6 @@ import { cn } from "@/src/lib/utils";
 import { Button } from "@/src/components/ui/button";
 import { FieldGroup } from "@/src/components/ui/field";
 import { authClient } from "@/src/lib/auth-client";
-import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 export function SocialLoginForm({
@@ -39,7 +38,7 @@ export function SocialLoginForm({
           <Button
             variant="outline"
             size="lg"
-            className="h-12 text-sm w-full font-medium border-border hover:bg-accent hover:text-accent-foreground transition-colors rounded-lg"
+            className="h-12 text-sm w-full font-medium bg-secondary/30 hover:bg-secondary border-border hover:border-foreground/20 transition-all rounded-lg shadow-sm"
             type="button"
             onClick={handleGithubSignIn}
             disabled={githubLoading || googleLoading}
@@ -67,7 +66,7 @@ export function SocialLoginForm({
           <Button
             variant="outline"
             size="lg"
-            className="h-12 text-sm w-full font-medium border-border hover:bg-accent hover:text-accent-foreground transition-colors rounded-lg"
+            className="h-12 text-sm w-full font-medium bg-secondary/30 hover:bg-secondary border-border hover:border-foreground/20 transition-all rounded-lg shadow-sm"
             type="button"
             onClick={handleGoogleSignIn}
             disabled={googleLoading || githubLoading}

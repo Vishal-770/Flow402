@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { withAuth } from "@/src/proxy";
 import { db } from "@/src/drizzle/db";
 import * as schema from "@/src/drizzle/schema";
-import { eq, desc, and, sql, count, avg, sum } from "drizzle-orm";
+import { eq, desc, and, sql, count, avg } from "drizzle-orm";
 
-export const GET = withAuth(async (req: Request, user: any) => {
+export const GET = withAuth(async (req: Request, user: { id: string }) => {
   try {
     const { searchParams } = new URL(req.url);
     const apiEndpointId = searchParams.get("apiEndpointId");
@@ -68,7 +68,7 @@ export const GET = withAuth(async (req: Request, user: any) => {
         failedCalls: sql<number>`COUNT(CASE WHEN ${schema.apiCalls.status} = 'failed' THEN 1 END)`,
         refundedCalls: sql<number>`COUNT(CASE WHEN ${schema.apiCalls.status} = 'refunded' THEN 1 END)`,
         avgLatency: avg(schema.apiCalls.latencyMs),
-        totalRevenue: sql<string>`SUM(CAST(${schema.apiCalls.priceAmount} AS NUMERIC))`,
+        totalRevenue: sql<string>`SUM(CASE WHEN ${schema.apiCalls.status} = 'success' THEN CAST(${schema.apiCalls.priceAmount} AS NUMERIC) ELSE 0 END)`,
       })
       .from(schema.apiCalls)
       .innerJoin(
@@ -92,7 +92,7 @@ export const GET = withAuth(async (req: Request, user: any) => {
     };
 
     // Get per-API statistics if not filtered by specific API
-    let perApiStats: any[] = [];
+    let perApiStats: unknown[] = [];
     if (!apiEndpointId) {
       perApiStats = await db
         .select({
@@ -104,7 +104,7 @@ export const GET = withAuth(async (req: Request, user: any) => {
           successCalls: sql<number>`COUNT(CASE WHEN ${schema.apiCalls.status} = 'success' THEN 1 END)`,
           failedCalls: sql<number>`COUNT(CASE WHEN ${schema.apiCalls.status} = 'failed' THEN 1 END)`,
           avgLatency: avg(schema.apiCalls.latencyMs),
-          revenue: sql<string>`SUM(CAST(${schema.apiCalls.priceAmount} AS NUMERIC))`,
+          revenue: sql<string>`SUM(CASE WHEN ${schema.apiCalls.status} = 'success' THEN CAST(${schema.apiCalls.priceAmount} AS NUMERIC) ELSE 0 END)`,
         })
         .from(schema.apiCalls)
         .innerJoin(

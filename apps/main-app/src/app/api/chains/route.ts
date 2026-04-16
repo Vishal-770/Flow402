@@ -2,9 +2,11 @@ import { NextResponse } from "next/server";
 import { db } from "@/src/drizzle/db";
 import { chains } from "@/src/drizzle/schema";
 import { createChainSchema } from "@/src/lib/validators/chain";
+import { withAdmin } from "@/src/proxy";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 
+// GET is public — chains are needed everywhere for display
 export async function GET() {
   try {
     const allChains = await db
@@ -28,8 +30,8 @@ export async function GET() {
   }
 }
 
-
-export async function POST(req: Request) {
+// POST is admin-only
+export const POST = withAdmin("create", async (req: Request) => {
   try {
     const json = await req.json();
     const body = createChainSchema.parse(json);
@@ -53,13 +55,11 @@ export async function POST(req: Request) {
         { status: 422 }
       );
     }
-    
-    // Check for unique constraint violation on chainId or name if possible, 
-    // though generic error handling is a good start.
+
     console.error("Error creating chain:", error);
     return NextResponse.json(
       { success: false, message: "Internal Server Error" },
       { status: 500 }
     );
   }
-}
+});

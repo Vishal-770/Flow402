@@ -2,10 +2,12 @@ import { NextResponse } from "next/server";
 import { db } from "@/src/drizzle/db";
 import { tokens, chains } from "@/src/drizzle/schema";
 import { createTokenSchema } from "@/src/lib/validators/token";
+import { withAdmin } from "@/src/proxy";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
 
+// GET is public — anyone can read tokens (needed for marketplace / API pricing)
 export async function GET() {
   try {
     const allTokens = await db
@@ -34,7 +36,8 @@ export async function GET() {
   }
 }
 
-export async function POST(req: Request) {
+// POST is admin-only
+export const POST = withAdmin("create", async (req: Request) => {
   try {
     const json: unknown = await req.json();
     const body = createTokenSchema.parse(json);
@@ -68,4 +71,4 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
-}
+});

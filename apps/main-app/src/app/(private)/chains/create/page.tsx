@@ -4,8 +4,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
+import { useIsAdmin } from "@/src/lib/use-is-admin";
 import { createChainSchema, type CreateChainInput } from "@/src/lib/validators/chain";
 import { uploadImage } from "@/src/lib/upload";
 import { Button } from "@/src/components/ui/button";
@@ -19,11 +20,19 @@ import {
 } from "@/src/components/ui/form";
 import { Input } from "@/src/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card";
-import { toast } from "sonner"; // Assuming sonner is used, or fallback to alert
+import { toast } from "sonner";
+import Image from "next/image";
 
 export default function CreateChainPage() {
   const router = useRouter();
+  const isAdmin = useIsAdmin();
   const [isUploading, setIsUploading] = useState(false);
+
+  useEffect(() => {
+    if (isAdmin === false) {
+      router.replace("/chains");
+    }
+  }, [isAdmin, router]);
 
   const form = useForm<CreateChainInput>({
     resolver: zodResolver(createChainSchema),
@@ -139,9 +148,11 @@ export default function CreateChainPage() {
                     />
                     {form.watch("imageUri") && (
                       <div className="relative w-12 h-12 rounded-full overflow-hidden border">
-                        <img
-                          src={form.watch("imageUri")}
+                        <Image
+                          src={form.watch("imageUri") || ""}
                           alt="Chain Icon"
+                          width={48}
+                          height={48}
                           className="w-full h-full object-cover"
                         />
                       </div>

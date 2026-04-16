@@ -2,16 +2,15 @@ import { NextResponse } from "next/server";
 import { db } from "@/src/drizzle/db";
 import { tokens } from "@/src/drizzle/schema";
 import { updateTokenSchema } from "@/src/lib/validators/token";
+import { withAdmin } from "@/src/proxy";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
-interface RouteParams {
-  params: Promise<{ id: string }>;
-}
-
-export async function PUT(req: Request, { params }: RouteParams) {
+// PUT — admin-only
+export const PUT = withAdmin("update", async (req: Request, _user, params) => {
   try {
-    const { id } = await params;
+    const { id: rawId } = await params;
+    const id = Array.isArray(rawId) ? rawId[0] : rawId;
     const json: unknown = await req.json();
     const body = updateTokenSchema.parse(json);
 
@@ -56,11 +55,13 @@ export async function PUT(req: Request, { params }: RouteParams) {
       { status: 500 }
     );
   }
-}
+});
 
-export async function DELETE(_req: Request, { params }: RouteParams) {
+// DELETE — admin-only
+export const DELETE = withAdmin("delete", async (_req: Request, _user, params) => {
   try {
-    const { id } = await params;
+    const { id: rawId } = await params;
+    const id = Array.isArray(rawId) ? rawId[0] : rawId;
 
     const existing = await db
       .select({ id: tokens.id })
@@ -85,4 +86,4 @@ export async function DELETE(_req: Request, { params }: RouteParams) {
       { status: 500 }
     );
   }
-}
+});

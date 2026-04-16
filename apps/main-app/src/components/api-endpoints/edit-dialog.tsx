@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
@@ -38,7 +38,8 @@ import {
 } from "@/src/components/ui/accordion";
 import { Switch } from "@/src/components/ui/switch";
 import { toast } from "sonner";
-import { Loader2, Plus, X, Upload, Trash2 } from "lucide-react";
+import { Loader2, X, Upload, Trash2 } from "lucide-react";
+import Image from "next/image";
 
 interface EditDialogProps {
   id: string | null;
@@ -105,12 +106,12 @@ export function EditApiEndpointDialog({ id, open, onOpenChange }: EditDialogProp
     enabled: open,
   });
 
-  const tokensList = tokensData?.data ?? [];
-  const walletsList = walletsData?.data ?? [];
+  const tokensList = useMemo(() => tokensData?.data ?? [], [tokensData]);
+  const walletsList = useMemo(() => walletsData?.data ?? [], [walletsData]);
 
   // ─── Form ──────────────────────────────────────────────────────────────
   const form = useForm<UpdateApiEndpointInput>({
-    resolver: zodResolver(updateApiEndpointSchema) as any,
+    resolver: zodResolver(updateApiEndpointSchema),
     defaultValues: {
       description: "",
       category: "",
@@ -135,7 +136,6 @@ export function EditApiEndpointDialog({ id, open, onOpenChange }: EditDialogProp
     reset,
     watch,
     setValue,
-    formState: { errors },
   } = form;
 
   // Field Arrays
@@ -170,7 +170,7 @@ export function EditApiEndpointDialog({ id, open, onOpenChange }: EditDialogProp
       // Reset publicId state since we don't know it for existing images
       setImagePublicId(null); 
     }
-  }, [endpointData, reset]);
+  }, [endpointData, reset, tokensList]);
 
   // ─── Handlers ──────────────────────────────────────────────────────────
 
@@ -194,7 +194,7 @@ export function EditApiEndpointDialog({ id, open, onOpenChange }: EditDialogProp
         const lastDotIndex = filename.lastIndexOf(".");
         if (lastDotIndex === -1) return filename;
         return filename.substring(0, lastDotIndex);
-    } catch (e) {
+    } catch {
         return null;
     }
   };
@@ -213,8 +213,8 @@ export function EditApiEndpointDialog({ id, open, onOpenChange }: EditDialogProp
         if (publicIdToDelete) {
              try {
                 await axios.delete(`/api/upload?public_id=${publicIdToDelete}`);
-             } catch (err) {
-                 console.warn("Failed to delete old image", err);
+             } catch {
+                 console.warn("Failed to delete old image");
              }
         }
     }
@@ -245,8 +245,8 @@ export function EditApiEndpointDialog({ id, open, onOpenChange }: EditDialogProp
              try {
                 await axios.delete(`/api/upload?public_id=${publicIdToDelete}`);
                 toast.success("Old image deleted from cloud");
-             } catch (err) {
-                 console.warn("Failed to delete old image", err);
+             } catch {
+                 console.warn("Failed to delete old image");
                  // Proceed anyway to clear form
              }
          }
@@ -276,11 +276,11 @@ export function EditApiEndpointDialog({ id, open, onOpenChange }: EditDialogProp
   const onSubmit = (data: UpdateApiEndpointInput) => {
     // Convert price to atomic units if token is found
     const token = tokensList.find(t => t.id === data.tokenId);
-    let finalData = { ...data };
+    const finalData = { ...data };
     if (token && data.priceAmount) {
         try {
             finalData.priceAmount = parseUnits(data.priceAmount, token.decimals).toString();
-        } catch (e) {
+        } catch {
             toast.error("Invalid price format");
             return;
         }
@@ -334,7 +334,13 @@ export function EditApiEndpointDialog({ id, open, onOpenChange }: EditDialogProp
                            <div className="flex items-center gap-4">
                                {watchedImageUrl && (
                                    <div className="relative w-20 h-20 rounded border overflow-hidden">
-                                       <img src={watchedImageUrl} alt="Preview" className="w-full h-full object-cover" />
+                                       <Image
+                                           src={watchedImageUrl}
+                                           alt="Preview"
+                                           width={80}
+                                           height={80}
+                                           className="w-full h-full object-cover"
+                                       />
                                    </div>
                                )}
                                <div className="flex-1">

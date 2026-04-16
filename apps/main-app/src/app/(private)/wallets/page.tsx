@@ -3,19 +3,12 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import {useTheme} from "next-themes"
 import { authClient } from "@/src/lib/auth-client";
-import { ConnectButton, useActiveAccount } from "thirdweb/react";
+import { ConnectButton, useActiveAccount ,  darkTheme, lightTheme} from "thirdweb/react";
 import { client } from "@/src/components/thirdweb-provider";
 import { Button } from "@/src/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/src/components/ui/card";
-import { Separator } from "@/src/components/ui/separator";
-import { Badge } from "@/src/components/ui/badge";
+import { Skeleton } from "@/src/components/ui/skeleton";
 import { toast } from "sonner";
 import {
   Wallet,
@@ -23,15 +16,11 @@ import {
   Check,
   Loader2,
   Trash2,
-  Link as LinkIcon,
   CheckCircle2,
-  Shield,
   Zap,
   ChevronRight,
-  ExternalLink,
   PlusCircle,
   Clock,
-  ArrowRight,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -43,7 +32,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/src/components/ui/alert-dialog";
-import { cn } from "@/src/lib/utils";
+import { Badge } from "@/src/components/ui/badge";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -78,10 +67,8 @@ const WalletsPage = () => {
   const [deleteWalletId, setDeleteWalletId] = useState<string | null>(null);
   const [deleteWalletAddress, setDeleteWalletAddress] = useState("");
 
-  // ─── Thirdweb: active account ──────────────────────────────────────────
   const activeAccount = useActiveAccount();
 
-  // ─── Fetch saved/linked wallets from DB ────────────────────────────────
   const walletsQuery = useQuery<WalletsApiResponse>({
     queryKey: ["wallets"],
     queryFn: async () => {
@@ -99,8 +86,7 @@ const WalletsPage = () => {
   const displayedWallets = isExpanded 
     ? savedWallets 
     : savedWallets.slice(0, 5);
-
-  // ─── Link wallet mutation (save to DB) ─────────────────────────────────
+    const {  theme  }= useTheme();
   const linkWalletMutation = useMutation({
     mutationFn: async (address: string) => {
       const res = await axios.post<SaveWalletResponse>("/api/wallets", {
@@ -129,7 +115,6 @@ const WalletsPage = () => {
     },
   });
 
-  // ─── Delete wallet mutation ────────────────────────────────────────────
   const deleteWalletMutation = useMutation({
     mutationFn: async (id: string) => {
       const res = await axios.delete(`/api/wallets/${id}`);
@@ -146,8 +131,6 @@ const WalletsPage = () => {
       toast.error("Revocation Failed");
     },
   });
-
-  // ─── Handlers ──────────────────────────────────────────────────────────
 
   const handleLinkWallet = (address: string) => {
     setLinkingAddress(address);
@@ -184,12 +167,32 @@ const WalletsPage = () => {
     }
   };
 
-  // ─── Loading ────────────────────────────────────────────────────────────
+  // ─── Loading State ────────────────────────────────────────────────────────
 
   if (isPending) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-primary opacity-50" />
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-16 space-y-12">
+        <div className="flex items-start justify-between pb-12 border-b border-border">
+          <div className="space-y-4 pt-2">
+            <Skeleton className="h-10 w-64" />
+            <Skeleton className="h-5 w-96" />
+          </div>
+          <Skeleton className="h-12 w-48 rounded-xl" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+          <div className="lg:col-span-8 space-y-10">
+            <Skeleton className="h-8 w-48" />
+            <div className="space-y-4">
+              <Skeleton className="h-28 w-full rounded-2xl" />
+              <Skeleton className="h-28 w-full rounded-2xl" />
+              <Skeleton className="h-28 w-full rounded-2xl" />
+            </div>
+          </div>
+          <div className="lg:col-span-4 space-y-10">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-[300px] w-full rounded-2xl" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -197,127 +200,127 @@ const WalletsPage = () => {
   // ─── Render ─────────────────────────────────────────────────────────────
 
   return (
-    <div className="pb-32 bg-background">
-      <main className="max-w-[1400px] mx-auto py-16 px-8 lg:px-12">
-        {/* Header Section: Flat & High Contrast */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 mb-16 border-b border-border/60 pb-12">
+    <div className="bg-background min-h-screen pb-32 pt-16">
+      <main className="max-w-7xl mx-auto px-4 md:px-6">
+        {/* Header Section: Professional & High Contrast */}
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 mb-16 border-b border-border pb-12">
           <div className="space-y-4">
-             <div className="flex items-center gap-4">
-               <div className="w-12 h-12 bg-primary/5 border border-primary/20 flex items-center justify-center rounded-2xl">
-                 <Shield className="h-6 w-6 text-primary" />
-               </div>
-               <h1 className="text-5xl font-black tracking-tighter leading-none">Wallets</h1>
-             </div>
-             <p className="text-muted-foreground text-xl font-medium max-w-xl">
-               Manage cryptographically verified identities and signatures for your Flow402 account.
-             </p>
+            <h1 className="text-4xl font-extrabold tracking-tight text-foreground flex items-center gap-4">
+              Wallet Security
+            </h1>
+            <p className="text-muted-foreground font-medium max-w-2xl">
+              Manage cryptographically verified identities and signatures. These signatures are used to prove ownership and authorize marketplace transactions.
+            </p>
           </div>
-          <div className="flex items-center gap-6 w-full lg:w-auto">
-            <div className="hidden sm:block text-right">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 mb-1">Total Identities</p>
-              <p className="text-2xl font-black text-foreground tabular-nums">{savedWallets.length}</p>
+          <div className="flex items-center gap-8 w-full lg:w-auto">
+            <div className="hidden sm:flex flex-col items-end">
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Active Links</p>
+              <div className="flex items-center gap-2">
+                 <Badge variant="secondary" className="text-lg px-3 py-0.5 rounded-md font-bold tabular-nums bg-muted/50 border border-border">
+                    {savedWallets.length}
+                 </Badge>
+              </div>
             </div>
             <ConnectButton
                 client={client}
-                theme={"dark"}
+                theme={theme === "light" ? lightTheme() : darkTheme()}
                 connectButton={{
-                  label: "Connect Account",
-                  className: "h-14 px-10 font-bold bg-primary text-primary-foreground hover:bg-primary/90 rounded-2xl transition-all block text-base flex-1 lg:flex-none",
+                  label: "Connect New Provider",
+                  className: "h-12 px-8 font-bold bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl transition-all w-full lg:w-auto text-sm shadow-sm",
                 }}
               />
           </div>
         </div>
 
         {/* Professional 12-Column Grid Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           
-          {/* Main Area: Linked Wallets (Cols 1-7/8) */}
+          {/* Main Area: Linked Wallets (Cols 1-8) */}
           <div className="lg:col-span-8 space-y-10">
             <div className="space-y-2">
-               <h3 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/40 flex items-center gap-3">
-                 <div className="w-8 h-px bg-border/60" /> Verified Signatures
-               </h3>
+               <h2 className="text-2xl font-bold text-foreground">Verified Signatures</h2>
+               <p className="text-sm text-muted-foreground font-medium">Platform-authorized cryptographic keys bound to your infrastructure profile.</p>
             </div>
 
             {walletsQuery.isLoading ? (
-              <div className="space-y-2">
-                {[1, 2, 3].map(i => <div key={i} className="h-20 rounded-2xl bg-muted/20 border border-border/40 animate-pulse" />)}
+              <div className="space-y-4">
+                {[1, 2, 3].map(i => <Skeleton key={i} className="h-28 w-full rounded-2xl" />)}
               </div>
             ) : savedWallets.length === 0 ? (
-              <div className="rounded-[3rem] border border-dashed border-border/60 bg-muted/5 py-24 text-center transition-colors hover:bg-muted/10">
-                <div className="w-16 h-16 rounded-3xl bg-muted/20 border border-border/40 flex items-center justify-center mx-auto mb-6">
-                   <PlusCircle className="h-8 w-8 text-muted-foreground/20" />
+              <div className="border border-border bg-muted/5 py-24 text-center rounded-2xl border-dashed">
+                <div className="w-16 h-16 bg-background border border-border flex items-center justify-center mx-auto mb-6 rounded-2xl shadow-sm">
+                   <PlusCircle className="h-6 w-6 text-muted-foreground/30" />
                 </div>
-                <h4 className="text-2xl font-black tracking-tight mb-2 opacity-80">Establish Linkage</h4>
-                <p className="text-muted-foreground max-w-sm mx-auto font-bold opacity-60">
-                  No cryptographic signatures detected. Connect a wallet to begin the verification process.
+                <h4 className="text-xl font-bold text-foreground mb-2">No active identities</h4>
+                <p className="text-sm text-muted-foreground max-w-xs mx-auto leading-relaxed font-medium">
+                  Begin by connecting a cryptographic provider to verify your first on-chain identity.
                 </p>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="flex flex-col border border-border rounded-2xl overflow-hidden bg-background shadow-sm">
                 {displayedWallets.map((wallet) => (
                   <div
                     key={wallet.id}
-                    className="group relative flex items-center gap-6 rounded-2xl border border-border/40 bg-card/10 p-5 hover:bg-muted/10 transition-colors backdrop-blur-sm overflow-hidden"
+                    className="group flex flex-col sm:flex-row items-center justify-between gap-6 p-6 border-b border-border last:border-0 hover:bg-muted/10 transition-colors"
                   >
-                    <div className="w-10 h-10 rounded-xl bg-background border border-border/60 flex items-center justify-center shrink-0">
-                      <Wallet className="h-5 w-5 text-muted-foreground/40" />
-                    </div>
-                    
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-3 mb-1 font-bold">
-                        <Badge variant="outline" className="text-[9px] uppercase font-black tracking-widest bg-muted/20 border-border/40 text-muted-foreground opacity-60 px-2 py-0 h-5">
-                          EVM
-                        </Badge>
-                        <span className="flex items-center gap-1.5 text-[10px] text-green-500 uppercase font-black tracking-widest">
-                          <CheckCircle2 className="h-3 w-3" /> VERIFIED
-                        </span>
+                    <div className="flex items-center gap-6 min-w-0">
+                      <div className="w-12 h-12 bg-muted/30 border border-border flex items-center justify-center shrink-0 rounded-xl transition-transform group-hover:scale-105 shadow-sm">
+                        <Wallet className="h-5 w-5 text-muted-foreground" />
                       </div>
-                      <p className="font-mono text-xs font-bold text-foreground truncate break-all tracking-tight tabular-nums opacity-90">
-                        {wallet.address}
-                      </p>
-                      <div className="flex items-center gap-3 mt-1 opacity-20">
-                         <Clock className="h-2.5 w-2.5" />
-                         <p className="text-[9px] font-black uppercase tracking-widest">Linked on {new Date(wallet.createdAt).toLocaleDateString()}</p>
+                      
+                      <div className="min-w-0 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-bold px-2 py-0.5 bg-primary/10 text-primary rounded-md border border-primary/20 tracking-widest uppercase">EVM</span>
+                          <span className="flex items-center gap-1.5 text-[10px] text-emerald-600 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/10 tracking-widest uppercase">
+                            <CheckCircle2 className="h-3 w-3" /> Linked
+                          </span>
+                        </div>
+                        <p className="font-mono text-sm text-foreground font-medium truncate max-w-xs sm:max-w-md">
+                          {wallet.address}
+                        </p>
                       </div>
                     </div>
 
-                    <div className="flex gap-2 relative z-10">
+                    <div className="flex gap-2 w-full sm:w-auto items-center justify-end sm:pl-4">
+                       <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mr-4 flex items-center gap-1.5">
+                         <Clock className="w-3.5 h-3.5" />
+                         {new Date(wallet.createdAt).toLocaleDateString()}
+                       </span>
                        <Button
                           variant="ghost"
                           size="icon"
-                          className="h-10 w-10 rounded-xl hover:bg-background border border-transparent hover:border-border/60 transition-all"
+                          className="h-10 w-10 text-muted-foreground hover:text-foreground hover:bg-background border-none transition-all rounded-xl"
                           onClick={() => handleCopyAddress(wallet.address)}
                         >
                           {copiedAddress === wallet.address ? (
-                            <Check className="h-4 w-4 text-green-500" />
+                            <Check className="h-4 w-4 text-emerald-500" />
                           ) : (
-                            <Copy className="h-4 w-4 text-muted-foreground/20 group-hover:text-foreground/60" />
+                            <Copy className="h-4 w-4" />
                           )}
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-10 w-10 rounded-xl border border-transparent hover:border-destructive/20 hover:bg-destructive/10 hover:text-destructive group/del transition-all"
+                          className="h-10 w-10 text-muted-foreground hover:bg-red-500/10 hover:text-red-500 border-none transition-all rounded-xl"
                           onClick={() => openDeleteWallet(wallet.address)}
                         >
-                          <Trash2 className="h-4 w-4 text-muted-foreground/10 group-hover/del:text-destructive/60" />
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                     </div>
                   </div>
                 ))}
 
                 {savedWallets.length > 5 && (
-                  <div className="pt-6">
+                  <div className="p-4 bg-muted/20">
                     <Button 
                       variant="ghost" 
-                      className="w-full h-14 rounded-2xl border border-border/60 hover:bg-muted/10 font-black text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-4 transition-all"
+                      className="w-full h-12 hover:bg-background transition-all text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 rounded-xl"
                       onClick={() => setIsExpanded(!isExpanded)}
                     >
                       {isExpanded ? (
-                        <>Contract View <ChevronRight className="h-4 w-4 rotate-[-90deg] transition-transform" /></>
+                        <>Contract History <ChevronRight className="h-4 w-4 rotate-[-90deg]" /></>
                       ) : (
-                        <>Expand All Identities <span className="opacity-30">({savedWallets.length - 5} More)</span> <ChevronRight className="h-4 w-4 rotate-90 transition-transform" /></>
+                        <>Expand Full Registry <span className="text-muted-foreground">({savedWallets.length - 5})</span> <ChevronRight className="h-4 w-4 rotate-90" /></>
                       )}
                     </Button>
                   </div>
@@ -327,107 +330,109 @@ const WalletsPage = () => {
           </div>
 
           {/* Sidebar Area: Live Session Monitor (Cols 9-12) */}
-          <div className="lg:col-span-4 space-y-10 sticky top-32 h-fit">
-            
+          <div className="lg:col-span-4 space-y-10 sticky top-8 h-fit">
             <div className="space-y-6">
-              <h3 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/40 flex items-center gap-3">
-                 <div className="w-8 h-px bg-border/60" /> Session Monitor
-              </h3>
+              <div className="space-y-2">
+                 <h2 className="text-2xl font-bold text-foreground">Active Session</h2>
+                 <p className="text-sm text-muted-foreground font-medium">Real-time signal monitoring</p>
+              </div>
               
-              <div className="rounded-[2.5rem] border border-border/60 bg-muted/5 p-10 relative overflow-hidden">
+              <div className="border border-border bg-background p-8 rounded-2xl relative overflow-hidden shadow-sm">
+                <div className="absolute top-0 right-0 p-3">
+                    <div className="h-1.5 w-1.5 rounded-full bg-primary/20 animate-ping" />
+                </div>
+
                 {activeAccount ? (
                   <div className="space-y-8 relative z-10">
-                    <div className="flex items-center gap-5">
-                      <div className="flex h-5 w-5 items-center justify-center rounded-full bg-green-500/20">
-                        <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_#22c55e]" />
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500/20">
+                        <div className="h-2 w-2 rounded-full bg-emerald-500" />
                       </div>
-                      <span className="font-extrabold text-xl tracking-tight leading-none opacity-80 uppercase text-[15px] tracking-widest">Active Provider</span>
+                      <span className="font-bold text-xs uppercase tracking-widest text-emerald-600">Provider Live</span>
                     </div>
                     
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 mb-3">CURRENT SIGNATURE</p>
-                      <div className="bg-background border border-border/60 rounded-2xl p-6 font-mono text-[11px] font-bold text-foreground transition-colors hover:border-primary/40 break-all select-all">
+                    <div className="space-y-3">
+                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Active Address</p>
+                      <div className="bg-muted/30 border border-border rounded-xl p-4 font-mono text-xs text-foreground break-all font-medium select-all">
                          {activeAccount.address}
                       </div>
                     </div>
 
-                    <div className="pt-4">
+                    <div className="pt-2">
                       {isAddressLinked(activeAccount.address) ? (
-                        <div className="flex items-center justify-center gap-3 py-4 w-full rounded-2xl bg-green-500/10 text-green-500 font-black text-xs uppercase tracking-[0.2em] shadow-inner">
-                           <CheckCircle2 className="h-4 w-4" /> LINK COMPLETE
+                        <div className="flex items-center justify-center gap-2 py-3 px-4 w-full border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 font-bold text-xs uppercase tracking-widest rounded-xl">
+                           <CheckCircle2 className="h-4 w-4" /> Identity Verified
                         </div>
                       ) : (
                         <Button
-                          className="w-full h-16 rounded-2xl font-black uppercase tracking-[0.2em] text-xs transition-all hover:bg-primary/90 active:scale-[0.99] shadow-none"
+                          className="w-full h-12 text-xs font-bold uppercase tracking-widest transition-all rounded-xl shadow-sm"
                           onClick={() => handleLinkWallet(activeAccount.address)}
                           disabled={linkingAddress === activeAccount.address}
                         >
                           {linkingAddress === activeAccount.address ? (
-                            <Loader2 className="h-4 w-4 animate-spin mr-3" />
+                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
                           ) : (
-                            <LinkIcon className="h-4 w-4 mr-3" />
+                            <PlusCircle className="h-4 w-4 mr-2" />
                           )}
-                          {linkingAddress === activeAccount.address ? "VERIFYING..." : "COMMIT IDENTITY"}
+                          {linkingAddress === activeAccount.address ? "Processing..." : "Commit Key"}
                         </Button>
                       )}
                     </div>
                     
-                    <p className="text-[11px] text-muted-foreground/40 text-center leading-relaxed font-bold uppercase tracking-widest italic pt-2">
-                       A signature challenge may be required to finalize linkage.
+                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest text-center leading-relaxed">
+                       Platform authorization requires <br /> a secure signature link.
                     </p>
                   </div>
                 ) : (
                   <div className="text-center py-12 space-y-6 relative z-10">
-                    <div className="w-20 h-20 rounded-[2rem] bg-background border border-border/60 flex items-center justify-center mx-auto transition-colors hover:border-primary/20 hover:bg-muted/10">
-                       <Zap className="h-10 w-10 text-muted-foreground/10" />
+                    <div className="w-16 h-16 bg-muted/30 border border-border flex items-center justify-center mx-auto rounded-2xl shadow-inner">
+                       <Zap className="h-6 w-6 text-muted-foreground/30" />
                     </div>
                     <div className="space-y-2">
-                       <h4 className="font-black text-lg uppercase tracking-widest opacity-30">Identity Inactive</h4>
-                       <p className="text-[11px] text-muted-foreground/30 leading-relaxed font-bold uppercase tracking-widest">
-                          Connect an external provider to monitor session status.
+                       <h4 className="font-bold text-sm text-foreground uppercase tracking-widest">Provider Idle</h4>
+                       <p className="text-xs text-muted-foreground max-w-[180px] mx-auto leading-relaxed font-medium">
+                          Connect a provider to initialize secure session management.
                        </p>
                     </div>
                   </div>
                 )}
               </div>
             </div>
-
           </div>
         </div>
       </main>
 
-      {/* Delete Wallet Dialog - Clinical & Precise */}
+      {/* Delete Wallet Dialog - Frameless Modal Pattern */}
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <AlertDialogContent className="rounded-[3rem] border border-border/60 bg-background p-12 max-w-xl transition-all shadow-none backdrop-blur-none">
+        <AlertDialogContent className="border border-border bg-background p-10 max-w-xl shadow-2xl rounded-[2rem]">
           <AlertDialogHeader className="space-y-6">
-            <AlertDialogTitle className="text-4xl font-black tracking-tighter leading-none">Revoke<br/>Identity?</AlertDialogTitle>
-            <AlertDialogDescription className="text-lg text-muted-foreground/80 font-medium leading-normal">
-              You are preparing to permanently revoke the cryptographic linkage for the following address:
-              
-              <div className="mt-8 mb-8 p-8 rounded-3xl bg-muted/10 border border-border/60 font-mono text-[11px] font-bold break-all text-foreground select-all opacity-80 leading-relaxed">
-                 {deleteWalletAddress}
-              </div>
-              
-              <span className="block font-black text-destructive/80 text-xs uppercase tracking-widest flex items-center gap-3">
-                <Shield className="h-4 w-4" /> This will immediately suspend all platform permissions and API signatures.
-              </span>
+            <AlertDialogTitle className="text-3xl font-extrabold tracking-tight text-foreground">Revoke Identity?</AlertDialogTitle>
+            <AlertDialogDescription className="text-base text-muted-foreground font-medium leading-relaxed">
+              You are about to permanently revoke the cryptographic linkage for the following address. This will immediately suspend all associated platform permissions.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="mt-12 flex flex-col sm:flex-row gap-6">
-            <AlertDialogCancel className="h-14 rounded-2xl font-black uppercase tracking-widest text-[11px] border border-border/60 bg-transparent flex-1 hover:bg-muted/10 transition-colors">CANCEL</AlertDialogCancel>
+          
+          <div className="space-y-6 my-8">
+            <div className="p-5 rounded-2xl bg-muted/30 border border-border font-mono text-sm text-foreground break-all select-all font-bold tracking-tight">
+               {deleteWalletAddress}
+            </div>
+          </div>
+
+          <AlertDialogFooter className="gap-3">
+            <AlertDialogCancel className="h-12 text-xs font-bold uppercase tracking-widest border-border bg-transparent flex-1 hover:bg-muted/50 rounded-xl m-0">Go Back</AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => {
                 e.preventDefault();
                 if (deleteWalletId) deleteWalletMutation.mutate(deleteWalletId);
               }}
-              className="h-14 rounded-2xl font-black uppercase tracking-widest text-[11px] bg-destructive text-destructive-foreground hover:bg-destructive/90 flex-1 shadow-none"
+              className="h-12 text-xs font-bold uppercase tracking-widest bg-red-500 text-white hover:bg-red-600 flex-1 rounded-xl border-none shadow-sm"
             >
               {deleteWalletMutation.isPending ? (
-                <Loader2 className="animate-spin h-4 w-4 mr-3" />
+                <Loader2 className="animate-spin h-4 w-4 mr-2" />
               ) : (
-                <Trash2 className="h-4 w-4 mr-3" />
+                <Trash2 className="h-4 w-4 mr-2" />
               )}
-              {deleteWalletMutation.isPending ? "REVOKING ACCESS..." : "CONFIRM REVOCATION"}
+              {deleteWalletMutation.isPending ? "Processing..." : "Confirm Revocation"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

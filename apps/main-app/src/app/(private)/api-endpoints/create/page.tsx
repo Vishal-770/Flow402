@@ -14,6 +14,7 @@ import {
 import { uploadImage } from "@/src/lib/upload";
 import { parseUnits } from "@/src/lib/utils/units";
 import { z } from "zod";
+import Image from "next/image";
 
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
@@ -146,7 +147,7 @@ export default function CreateApiEndpointPage() {
 
   // ─── Form Setup ────────────────────────────────────────────────────────
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema) as any,
+    resolver: zodResolver(formSchema),
     defaultValues: {
       description: "",
       category: "",
@@ -238,8 +239,7 @@ export default function CreateApiEndpointPage() {
     : [];
 
   const selectedToken = allTokens.find((t) => t.id === watchedTokenId);
-  const selectedChain = chainsList.find((c) => c.id === watchedChainId);
-  const selectedWallet = walletsList.find((w) => w.id === watch("walletId"));
+  // Note: selectedChain and selectedWallet used for display in review step
 
   // ─── Mutations ─────────────────────────────────────────────────────────
   const createMutation = useMutation({
@@ -304,7 +304,7 @@ export default function CreateApiEndpointPage() {
   };
 
   const validateStep = async (step: number) => {
-    let fieldsToValidate: any[] = [];
+    let fieldsToValidate: string[] = [];
     switch (step) {
       case 0: // Basic Info
         fieldsToValidate = ["description", "category", "docsUrl"]; // Image optional
@@ -329,7 +329,7 @@ export default function CreateApiEndpointPage() {
         break;
     }
 
-    const result = await trigger(fieldsToValidate);
+    const result = await trigger(fieldsToValidate as Parameters<typeof trigger>[0]);
     
     // Extra manual checks
     if (step === 5 && !watchedChainId) {
@@ -372,7 +372,7 @@ export default function CreateApiEndpointPage() {
             if (token) {
                 try {
                     finalPrice = parseUnits(data.priceAmount, token.decimals).toString();
-                } catch (e) {
+                } catch {
                     toast.error("Invalid price format");
                     return;
                 }
@@ -512,9 +512,11 @@ export default function CreateApiEndpointPage() {
                     <Label>API Image (Optional)</Label>
                     {watchedImageUrl ? (
                         <div className="relative group w-full h-64 rounded-md overflow-hidden border border-input shadow-sm bg-muted/20">
-                            <img
+                            <Image
                                 src={watchedImageUrl}
                                 alt="API Preview"
+                                width={400}
+                                height={256}
                                 className="w-full h-full object-contain"
                             />
                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -661,7 +663,7 @@ export default function CreateApiEndpointPage() {
                 <div className="space-y-4 max-w-3xl">
                      {headersFields.fields.length === 0 && (
                         <div className="border border-dashed rounded-lg p-8 text-center text-muted-foreground">
-                            No headers configured. Click "Add Header" to start.
+                            No headers configured. Click &quot;Add Header&quot; to start.
                         </div>
                      )}
                      {headersFields.fields.map((field, index) => (
@@ -722,7 +724,7 @@ export default function CreateApiEndpointPage() {
                 <div className="space-y-4 max-w-3xl">
                     {paramsFields.fields.length === 0 && (
                         <div className="border border-dashed rounded-lg p-8 text-center text-muted-foreground">
-                            No parameters configured. Click "Add Parameter" to start.
+                            No parameters configured. Click &quot;Add Parameter&quot; to start.
                         </div>
                      )}
                     {paramsFields.fields.map((field, index) => (
@@ -812,7 +814,7 @@ export default function CreateApiEndpointPage() {
                 <div className="space-y-4 max-w-3xl">
                      {bodyFields.fields.length === 0 && (
                         <div className="border border-dashed rounded-lg p-8 text-center text-muted-foreground">
-                            No body fields configured. Click "Add Field" to start.
+                            No body fields configured. Click &quot;Add Field&quot; to start.
                         </div>
                      )}
                     {bodyFields.fields.map((field, index) => (
@@ -918,9 +920,11 @@ export default function CreateApiEndpointPage() {
                             <SelectItem key={chain.id} value={chain.id}>
                                 <div className="flex items-center gap-2">
                                 {chain.imageUri && (
-                                    <img
+                                    <Image
                                     src={chain.imageUri}
                                     alt={chain.name}
+                                    width={16}
+                                    height={16}
                                     className="w-4 h-4 rounded-full"
                                     />
                                 )}
@@ -951,7 +955,7 @@ export default function CreateApiEndpointPage() {
                                         <SelectItem key={token.id} value={token.id}>
                                             <div className="flex items-center gap-2">
                                                 {token.imageUri && (
-                                                    <img src={token.imageUri} alt={token.symbol} className="w-4 h-4 rounded-full" />
+                                                    <Image src={token.imageUri} alt={token.symbol} width={16} height={16} className="w-4 h-4 rounded-full" />
                                                 )}
                                                 {token.symbol}
                                             </div>

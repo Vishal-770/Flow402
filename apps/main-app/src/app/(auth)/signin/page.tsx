@@ -2,71 +2,62 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
 import { SocialLoginForm } from "@/src/components/ui/social-login-form";
-import { Separator } from "@/src/components/ui/separator";
 
 export default function LoginPage() {
   return (
     <div className="flex min-h-svh w-full items-stretch overflow-hidden bg-background">
       {/* Left Column — Brand Hero Panel */}
-      <div className="relative hidden lg:flex flex-col justify-between w-1/2 p-12 xl:p-16 text-white bg-zinc-950 overflow-hidden shrink-0">
-        {/* Background hero image */}
-        <div
-          className="absolute inset-0 z-0 opacity-20 bg-cover bg-center"
-          style={{ backgroundImage: 'url("/login-hero.png")' }}
-        />
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 z-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-zinc-950/20" />
+      <div className="relative hidden lg:flex flex-col justify-between w-1/2 p-20 xl:p-24 text-white bg-zinc-950 overflow-hidden shrink-0 border-r border-white/5">
+        {/* Subtle grid pattern instead of gradient/image */}
+        <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:40px_40px]" />
 
         {/* Top nav */}
         <div className="relative z-10">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-sm font-medium text-white/50 hover:text-white/90 transition-colors"
+            className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/30 hover:text-white/90 transition-colors group"
           >
-            <ArrowLeft className="size-4" />
+            <ArrowLeft className="size-3 group-hover:-translate-x-1 transition-transform" />
             Back to Platform
           </Link>
         </div>
 
         {/* Branding */}
-        <div className="relative z-10 max-w-lg space-y-8">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 flex items-center justify-center p-2 bg-white/10 border border-white/20 rounded-xl backdrop-blur-sm">
+        <div className="relative z-10 max-w-lg space-y-12">
+          <div className="flex items-center gap-6">
+            <div className="w-16 h-16 flex items-center justify-center p-3 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md shadow-2xl">
               <Image
                 src="/logo.png"
                 alt="Flow402"
-                width={32}
-                height={32}
-                className="object-contain"
+                width={40}
+                height={40}
+                className="object-contain invert"
               />
             </div>
-            <div>
-              <span className="text-2xl font-bold tracking-tight block">
+            <div className="space-y-1">
+              <span className="text-2xl font-extrabold tracking-tighter block uppercase">
                 Flow402
               </span>
-              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/40">
-                Infrastructure for Web3
+              <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-white/30">
+                Core Protocol
               </span>
             </div>
           </div>
 
-          <h2 className="text-4xl xl:text-5xl font-bold tracking-tight leading-[1.1] text-white">
-            Accelerate your Web3 scale with high-performance APIs.
+          <h2 className="text-5xl xl:text-6xl font-extrabold tracking-tight leading-[1] text-white">
+            Monetize <br /> Infrastructure.
           </h2>
 
-          <p className="text-white/60 leading-relaxed font-medium">
-            A high-performance ecosystem where developers build, monetize, and
-            scale with zero friction.
+          <p className="text-white/50 text-lg leading-relaxed font-medium">
+            Advanced developer portal for high-performance API distribution and real-time revenue settlement on Sepolia.
           </p>
-
-          <div className="h-px w-16 bg-white/20" />
         </div>
 
         {/* Footer citation */}
-        <div className="relative z-10 text-[10px] font-bold text-white/25 uppercase tracking-widest flex items-center gap-3">
-          <span>Standard Protocol V.1.0</span>
-          <span className="w-1 h-1 bg-white/20 rounded-full" />
-          <span>© 2026 Flow402 Networks</span>
+        <div className="relative z-10 text-[10px] font-bold text-white/20 uppercase tracking-[0.4em] flex items-center gap-4">
+          <span>Auth Service 1.0</span>
+          <div className="h-px w-8 bg-white/5" />
+          <span>© 2026 Registry</span>
         </div>
       </div>
 
@@ -80,27 +71,27 @@ export default function LoginPage() {
           Back
         </Link>
 
-        <div className="w-full max-w-sm space-y-8">
+        <div className="w-full max-w-sm space-y-12">
           {/* Logo mark */}
-          <div className="flex flex-col items-center text-center space-y-4">
+          <div className="flex flex-col items-center text-center space-y-6">
             <Link
               href="/"
-              className="w-14 h-14 flex items-center justify-center p-3 bg-card rounded-xl border border-border hover:border-primary/40 transition-colors"
+              className="w-16 h-16 flex items-center justify-center p-4 bg-muted/30 rounded-2xl border border-border hover:border-primary/40 transition-all shadow-sm"
             >
               <Image
                 src="/logo.png"
                 alt="Flow402"
-                width={40}
-                height={40}
-                className="object-contain"
+                width={48}
+                height={48}
+                className="object-contain dark:invert"
               />
             </Link>
-            <div className="space-y-1.5">
-              <h1 className="text-2xl font-bold tracking-tight">
-                Welcome to Flow402
+            <div className="space-y-2">
+              <h1 className="text-3xl font-extrabold tracking-tight">
+                Welcome back
               </h1>
-              <p className="text-sm text-muted-foreground max-w-[260px] mx-auto leading-relaxed">
-                Sign in to access your dashboard and manage your API ecosystem.
+              <p className="text-sm text-muted-foreground font-medium leading-relaxed">
+                Log in to your terminal to manage <br /> assets and endpoints.
               </p>
             </div>
           </div>

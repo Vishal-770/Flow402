@@ -13,9 +13,10 @@ import { withAuth } from "@/src/proxy";
 import { createApiEndpointSchema } from "@/src/lib/validators/api-endpoint";
 import { z } from "zod";
 
-export const GET = withAuth(async (req: Request, user: any, params: any) => {
+export const GET = withAuth(async (req: Request, user: { id: string }, params: Promise<Record<string, string | string[]>>) => {
   try {
-    const { id } = await params;
+    const { id: rawId } = await params;
+    const id = Array.isArray(rawId) ? rawId[0] : rawId;
 
     const endpoint = await db.query.apiEndpoints.findFirst({
       where: and(eq(apiEndpoints.id, id), eq(apiEndpoints.providerId, user.id)),
@@ -32,7 +33,7 @@ export const GET = withAuth(async (req: Request, user: any, params: any) => {
     }
 
     // Transform tags to an array of strings
-    const tags = endpoint.apiTags?.map((t: any) => t.tag) || [];
+    const tags = endpoint.apiTags?.map((t: { tag: string }) => t.tag) || [];
 
     return NextResponse.json({
       success: true,
@@ -47,9 +48,10 @@ export const GET = withAuth(async (req: Request, user: any, params: any) => {
   }
 });
 
-export const PATCH = withAuth(async (req: Request, user: any, params: any) => {
+export const PATCH = withAuth(async (req: Request, user: { id: string }, params: Promise<Record<string, string | string[]>>) => {
   try {
-    const { id } = await params;
+    const { id: rawId } = await params;
+    const id = Array.isArray(rawId) ? rawId[0] : rawId;
     const json: unknown = await req.json();
     
     // Partially reuse the creation schema for validation
@@ -164,9 +166,10 @@ export const PATCH = withAuth(async (req: Request, user: any, params: any) => {
   }
 });
 
-export const DELETE = withAuth(async (req: Request, user: any, params: any) => {
+export const DELETE = withAuth(async (req: Request, user: { id: string }, params: Promise<Record<string, string | string[]>>) => {
   try {
-    const { id } = await params;
+    const { id: rawId } = await params;
+    const id = Array.isArray(rawId) ? rawId[0] : rawId;
 
     // Verify ownership and delete
     const result = await db

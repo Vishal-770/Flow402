@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
@@ -36,7 +37,7 @@ const Sidebar = () => {
       {/* Logo */}
       <div className="h-16 flex items-center px-6 border-b border-border">
         <Link href="/" className="flex items-center gap-2">
-          <img src="/logo.png" alt="Flow402" className="h-7 w-auto" />
+          <Image src="/logo.png" alt="Flow402" width={28} height={28} className="h-7 w-auto dark:invert" />
           <span className="text-lg font-bold tracking-tight text-foreground">
             Flow402
           </span>

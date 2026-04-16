@@ -43,7 +43,7 @@ export async function GET(
         if (!response.ok && (response.status === 405 || response.status === 403)) {
           throw new Error("HEAD failed");
         }
-      } catch (err) {
+      } catch {
         // Fallback to GET
         response = await fetch(providerUrl, {
           method: "GET",
@@ -63,8 +63,8 @@ export async function GET(
           message: response ? `HTTP ${response.status}` : "No response"
         });
       }
-    } catch (error: any) {
-      const isTimeout = error.name === 'AbortError' || error.message.includes('timeout');
+    } catch (error) {
+      const isTimeout = error instanceof Error && (error.name === 'AbortError' || error.message.includes('timeout'));
       return NextResponse.json({ 
         success: true, 
         status: "error", 

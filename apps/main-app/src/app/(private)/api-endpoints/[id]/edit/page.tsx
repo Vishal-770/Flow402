@@ -7,9 +7,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  createApiEndpointSchema,
-} from "@/src/lib/validators/api-endpoint";
 import { uploadImage } from "@/src/lib/upload";
 import { z } from "zod";
 
@@ -26,9 +23,7 @@ import {
 } from "@/src/components/ui/select";
 import { toast } from "sonner";
 import {
-  ArrowLeft,
   Loader2,
-  Check,
   Plus,
   Trash2,
   Upload,
@@ -39,11 +34,11 @@ import {
   List,
   Code,
   FileJson,
-  Server,
   BarChart3
 } from "lucide-react";
+import Image from "next/image";
 import { Badge } from "@/src/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/src/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/src/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/components/ui/tabs";
 import { Switch } from "@/src/components/ui/switch";
 import { Separator } from "@/src/components/ui/separator";
@@ -81,14 +76,14 @@ const editSchema = z.object({
   queryParams: z.array(z.object({
     name: z.string().min(1, "Param name is required"),
     type: z.string().min(1, "Type is required"),
-    required: z.boolean().default(false),
+    required: z.boolean(),
     description: z.string().optional(),
     defaultValue: z.string().optional(),
   })).optional(),
   requestBody: z.array(z.object({
     fieldName: z.string().min(1, "Field name is required"),
     fieldType: z.string().min(1, "Field type is required"),
-    required: z.boolean().default(false),
+    required: z.boolean(),
     description: z.string().optional(),
     exampleValue: z.string().optional(),
   })).optional(),
@@ -106,7 +101,7 @@ export default function EditApiEndpointPage() {
   const [tagInput, setTagInput] = useState("");
 
   const form = useForm<EditFormValues>({
-    resolver: zodResolver(editSchema) as any,
+    resolver: zodResolver(editSchema),
     defaultValues: {
       description: "",
       category: "",
@@ -160,7 +155,7 @@ export default function EditApiEndpointPage() {
   // Handle unauthorized or missing data
   useEffect(() => {
     if (fetchError) {
-      toast.error("You don't have permission to edit this endpoint or it doesn't exist.");
+      toast.error("You don&apos;t have permission to edit this endpoint or it doesn&apos;t exist.");
       router.push("/dashboard");
     }
   }, [fetchError, router]);
@@ -177,18 +172,18 @@ export default function EditApiEndpointPage() {
         gatewayPath: endpointData.gatewayPath || "",
         providerUrl: endpointData.providerUrl || "",
         tags: endpointData.tags || [],
-        upstreamHeaders: endpointData.apiUpstreamHeaders?.map((h: any) => ({
+        upstreamHeaders: endpointData.apiUpstreamHeaders?.map((h: { headerName: string; headerValue: string }) => ({
           headerName: h.headerName,
           headerValue: h.headerValue,
         })) || [],
-        queryParams: endpointData.apiQueryParams?.map((p: any) => ({
+        queryParams: endpointData.apiQueryParams?.map((p: { name: string; type: string; required: boolean; description?: string; defaultValue?: string }) => ({
           name: p.name,
           type: p.type,
           required: p.required,
           description: p.description || "",
           defaultValue: p.defaultValue || "",
         })) || [],
-        requestBody: endpointData.apiRequestBodies?.map((b: any) => ({
+        requestBody: endpointData.apiRequestBodies?.map((b: { fieldName: string; fieldType: string; required: boolean; description?: string; exampleValue?: string }) => ({
           fieldName: b.fieldName,
           fieldType: b.fieldType,
           required: b.required,
@@ -213,8 +208,9 @@ export default function EditApiEndpointPage() {
       toast.success("API Endpoint updated successfully");
       router.push("/dashboard");
     },
-    onError: (error: any) => {
-      const message = error.response?.data?.message || "Failed to update API endpoint";
+    onError: (error: unknown) => {
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      const message = axiosError.response?.data?.message || "Failed to update API endpoint";
       toast.error(message);
     },
   });
@@ -233,7 +229,7 @@ export default function EditApiEndpointPage() {
       setIsUploading(true);
       const res = await uploadImage(file);
       // Use any for the response since uploadImage might return different structures
-      const imageUrl = (res as any).secure_url || (res as any).url;
+      const imageUrl = (res as { secure_url?: string; url?: string }).secure_url || (res as { secure_url?: string; url?: string }).url;
       if (imageUrl) {
         setValue("imageUrl", imageUrl, { shouldValidate: true });
         toast.success("Image uploaded successfully");
@@ -382,9 +378,11 @@ export default function EditApiEndpointPage() {
                                     <Label>API Image (Optional)</Label>
                                     {watchedImageUrl ? (
                                         <div className="relative group w-full h-64 rounded-[2rem] overflow-hidden border border-input shadow-sm bg-muted/20">
-                                            <img
+                                            <Image
                                                 src={watchedImageUrl}
                                                 alt="API Preview"
+                                                width={400}
+                                                height={256}
                                                 className="w-full h-full object-contain"
                                             />
                                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
