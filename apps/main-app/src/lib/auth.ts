@@ -29,11 +29,15 @@ export const auth = betterAuth({
       create: {
         after: async (user) => {
           if (user.email) {
-            await sendWelcomeEmail({
-              id: user.id,
-              email: user.email,
-              name: user.name,
-            });
+            try {
+              await sendWelcomeEmail({
+                id: user.id,
+                email: user.email,
+                name: user.name,
+              });
+            } catch (error) {
+              console.error("Failed to process welcome email hook:", error);
+            }
           }
         },
       },

@@ -23,16 +23,21 @@ export async function sendEmail({ userId, to, subject, html }: SendEmailOptions)
   const emailId = nanoid();
   
   // Create pending entry in DB
-  await db.insert(schema.emails).values({
-    id: emailId,
-    userId,
-    email: to,
-    subject,
-    body: html,
-    status: "queued",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  });
+  try {
+    await db.insert(schema.emails).values({
+      id: emailId,
+      userId,
+      email: to,
+      subject,
+      body: html,
+      status: "queued",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  } catch (dbError) {
+    console.warn("Failed to log email to database:", dbError);
+    // Continue anyway to try and send the email
+  }
 
   try {
     const info = await transporter.sendMail({
