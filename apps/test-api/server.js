@@ -152,17 +152,21 @@ app.use((req, res) => {
 });
 
 // For local direct execution
-if (process.env.NODE_ENV !== 'production' && !process.env.CLOUDFLARE_WORKER) {
+if (process.env.NODE_ENV !== 'production' && !process.env.CLOUDFLARE_WORKER && !process.env.VERCEL) {
   app.listen(port, () => {
     console.log(`Dummy test server listening at http://localhost:${port}`);
   });
 }
 
-// Export for Cloudflare Workers
+// Handler for Cloudflare Workers
 const handler = serverless(app);
 
-export default {
+const cfExport = {
   fetch: async (request, env, ctx) => {
     return await handler(request, env, ctx);
   }
 };
+
+// Hybrid Export: Support both Vercel (default app export) and Cloudflare (fetch wrapper)
+export const fetch = cfExport.fetch;
+export default (process.env.VERCEL ? app : cfExport);
