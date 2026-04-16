@@ -14,6 +14,11 @@ A simple Express server for testing proxy and gateway logic.
 | `/v1/market/prices` | `GET` | [View Docs](./docs/market_prices.md) | Complex query string processing |
 | `/v1/analytics/report` | `POST` | [View Docs](./docs/analytics_report.md) | Custom header & array ingestion |
 | `/v1/infrastructure/config/:region` | `GET` | [View Docs](./docs/infrastructure_config.md) | Path parameter resolution |
+| `/v1/weather/forecast` | `GET` | [View Docs](./docs/weather_forecast.md) | Geo-location weather data |
+| `/v1/finance/conversion` | `GET` | [View Docs](./docs/finance_conversion.md) | Multi-currency exchange rates |
+| `/v1/inventory/lookup` | `GET` | [View Docs](./docs/inventory_lookup.md) | Global SKU inventory tracking |
+| `/v1/news/aggregate` | `GET` | [View Docs](./docs/news_aggregate.md) | Topic-based news sentiment |
+| `/v1/crypto/gas` | `GET` | [View Docs](./docs/crypto_gas.md) | Real-time blockchain gas fees |
 
 ---
 

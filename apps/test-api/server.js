@@ -14,7 +14,7 @@ app.get('/', (req, res) => {
   res.json({
     success: true,
     message: "Flow402 Test API is operational",
-    endpoints: ["/user", "/echo", "/status", "/v1/auth/validate", "/v1/transactions/create", "/v1/market/prices", "/v1/analytics/report", "/v1/infrastructure/config/:region"]
+    endpoints: ["/user", "/echo", "/status", "/v1/auth/validate", "/v1/transactions/create", "/v1/market/prices", "/v1/analytics/report", "/v1/infrastructure/config/:region", "/v1/weather/forecast", "/v1/finance/conversion", "/v1/inventory/lookup", "/v1/news/aggregate", "/v1/crypto/gas"]
   });
 });
 
@@ -131,6 +131,88 @@ app.get('/v1/infrastructure/config/:region', (req, res) => {
     success: true,
     region: region,
     configuration: config[region] || config.default
+  });
+});
+
+// ─── Phase 4: Extended Query Parameter Use Cases ───────────────────────────
+
+app.get('/v1/weather/forecast', (req, res) => {
+  const { lat, lon, units = 'metric' } = req.query;
+  if (!lat || !lon) {
+    return res.status(400).json({ success: false, error: "Latitude and Longitude are required" });
+  }
+  res.json({
+    success: true,
+    location: { lat, lon },
+    units,
+    forecast: {
+      temperature: (Math.random() * 30).toFixed(1),
+      condition: ["Sunny", "Cloudy", "Rainy", "Partly Cloudy"][Math.floor(Math.random() * 4)],
+      humidity: Math.floor(Math.random() * 100) + "%"
+    }
+  });
+});
+
+app.get('/v1/finance/conversion', (req, res) => {
+  const { from = 'USD', to = 'EUR', amount = 1 } = req.query;
+  const rate = (0.8 + Math.random() * 0.4).toFixed(4);
+  res.json({
+    success: true,
+    from,
+    to,
+    amount: parseFloat(amount as string),
+    rate: parseFloat(rate),
+    result: (parseFloat(amount as string) * parseFloat(rate)).toFixed(2),
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.get('/v1/inventory/lookup', (req, res) => {
+  const { sku, warehouse = 'Global' } = req.query;
+  if (!sku) {
+    return res.status(400).json({ success: false, error: "SKU is required" });
+  }
+  res.json({
+    success: true,
+    sku,
+    warehouse,
+    stock_level: Math.floor(Math.random() * 500),
+    status: Math.random() > 0.1 ? "in_stock" : "out_of_stock",
+    last_updated: new Date().toISOString()
+  });
+});
+
+app.get('/v1/news/aggregate', (req, res) => {
+  const { topic = 'Technology', limit = '3' } = req.query;
+  const numLimit = parseInt(limit as string) || 3;
+  const articles = Array.from({ length: numLimit }).map((_, i) => ({
+    id: i + 1,
+    title: `${topic} News Item ${i + 1}`,
+    sentiment: ["positive", "neutral", "negative"][Math.floor(Math.random() * 3)],
+    relevance: (Math.random()).toFixed(2)
+  }));
+  res.json({
+    success: true,
+    topic,
+    count: articles.length,
+    articles
+  });
+});
+
+app.get('/v1/crypto/gas', (req, res) => {
+  const { chain = 'ethereum', speed = 'standard' } = req.query;
+  const baseGas = Math.floor(Math.random() * 50) + 10;
+  const speeds: Record<string, number> = {
+    slow: baseGas * 0.8,
+    standard: baseGas,
+    fast: baseGas * 1.5
+  };
+  res.json({
+    success: true,
+    chain: (chain as string).toLowerCase(),
+    requested_speed: speed,
+    gwei: Math.floor(speeds[speed as string] || baseGas),
+    estimated_seconds: speed === 'fast' ? 15 : speed === 'standard' ? 60 : 300
   });
 });
 

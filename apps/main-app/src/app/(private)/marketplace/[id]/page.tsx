@@ -23,7 +23,6 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from "@/src/components/ui/card";
 import {
   Tabs,
@@ -52,7 +51,6 @@ import {
   Copy,
   Check,
   ExternalLink,
-  ArrowRight,
   Database,
   Star,
   MessageSquare,
@@ -336,28 +334,25 @@ export default function EndpointDetailPage() {
   if (detailQuery.isLoading) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <div className="relative bg-muted/30 pt-12 pb-24 px-6 overflow-hidden">
+        <div className="bg-muted/10 pt-8 md:pt-12 pb-12 md:pb-16 px-4 md:px-6">
           <div className="max-w-7xl mx-auto space-y-8 animate-pulse">
             <div className="h-4 w-32 bg-secondary/50 rounded-md" />
-            <div className="flex flex-col md:flex-row gap-8 items-start">
-              <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl bg-secondary/30 border border-border shrink-0" />
-              <div className="flex-1 space-y-4 w-full">
+            <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
+              <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl bg-secondary/50 border border-border shrink-0" />
+              <div className="flex-1 space-y-6 w-full">
                 <div className="flex gap-2">
                   <div className="h-6 w-20 bg-secondary/50 rounded-md" />
                   <div className="h-6 w-24 bg-secondary/50 rounded-md" />
                 </div>
-                <div className="h-12 md:h-14 w-3/4 max-w-md bg-secondary/50 rounded-xl" />
-                <div className="flex gap-3">
-                  <div className="h-6 w-32 bg-secondary/50 rounded-md" />
-                  <div className="h-6 w-24 bg-secondary/50 rounded-md" />
-                </div>
+                <div className="h-10 md:h-12 w-3/4 max-w-sm bg-secondary/50 rounded-lg" />
+                <div className="h-4 w-48 bg-secondary/30 rounded-md" />
               </div>
             </div>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto px-6 -mt-12 space-y-8 animate-pulse">
-           <div className="h-14 w-full lg:w-2/3 bg-secondary/50 rounded-2xl" />
-           <div className="h-[400px] w-full lg:w-2/3 bg-secondary/30 rounded-2xl border border-border" />
+        <div className="max-w-7xl mx-auto px-4 md:px-6 -mt-8 space-y-8 animate-pulse">
+           <div className="h-12 w-full lg:w-2/3 bg-secondary/40 rounded-xl" />
+           <div className="h-[400px] w-full lg:w-2/3 bg-secondary/20 rounded-xl border border-border" />
         </div>
       </div>
     );
@@ -366,17 +361,17 @@ export default function EndpointDetailPage() {
   if (detailQuery.isError || !endpoint) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
-        <Card className="max-w-md w-full text-center p-8 rounded-[2rem] border-dashed">
-          <Globe className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-20" />
-          <h2 className="text-2xl font-bold mb-2">API Not Found</h2>
-          <p className="text-muted-foreground mb-6">
+        <Card className="max-w-md w-full text-center p-8 rounded-xl border-dashed">
+          <Globe className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-30" />
+          <h2 className="text-xl font-bold mb-2">API Not Found</h2>
+          <p className="text-muted-foreground mb-6 text-sm">
             The endpoint you are looking for might have been de-listed or
-            doesn&apos;t exist.
+            doesn&apos;t exist in our registry.
           </p>
           <Button
             onClick={() => router.push("/marketplace")}
             variant="outline"
-            className="rounded-xl"
+            className="rounded-lg"
           >
             Back to Marketplace
           </Button>
@@ -395,18 +390,18 @@ export default function EndpointDetailPage() {
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Hero Section */}
-      <div className="pt-8 md:pt-12 pb-12 md:pb-16 px-4 md:px-6">
+      <div className="bg-muted/10 pt-8 md:pt-12 pb-12 md:pb-16 px-4 md:px-6">
         <div className="max-w-7xl mx-auto">
           <Link
             href="/marketplace"
-            className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground mb-6 md:mb-8 transition-colors group"
+            className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground mb-6 md:mb-8 transition-colors"
           >
             <ChevronLeft className="mr-1 h-4 w-4" />
-            Back to Marketplace
+            Back to Registry
           </Link>
-
+ 
           <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center md:items-start text-center md:text-left">
-            <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl bg-secondary border border-border flex items-center justify-center overflow-hidden shrink-0">
+            <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl bg-card border border-border flex items-center justify-center overflow-hidden shrink-0">
               {endpoint.imageUrl ? (
                 <Image
                   src={endpoint.imageUrl}
@@ -423,28 +418,30 @@ export default function EndpointDetailPage() {
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-4">
                 <Badge
                   variant="outline"
-                  className="bg-background/50 backdrop-blur-sm border-primary/20 text-primary"
+                  className="bg-background border-border text-foreground font-medium"
                 >
                   {endpoint.category || "General"}
                 </Badge>
                 <Badge
                   variant="outline"
-                  className="bg-background/50 backdrop-blur-sm"
+                  className="bg-background"
                 >
-                  <Shield className="h-3 w-3 mr-1 text-primary" />
+                  <Shield className="h-3 w-3 mr-1" />
                   {endpoint.chainName}
                 </Badge>
-                <div className="flex items-center gap-1 bg-yellow-400/10 text-yellow-600 dark:text-yellow-400 px-2 py-0.5 rounded-full text-xs font-bold border border-yellow-400/20">
-                  <Star className="h-3 w-3 fill-current" />
-                  {stats?.averageRating.toFixed(1) || "0.0"} (
-                  {stats?.totalCount || 0})
+                <div className="flex items-center gap-1 bg-muted px-2 py-0.5 rounded-full text-xs font-medium border border-border">
+                  {stats?.averageRating.toFixed(1) || "0.0"} ({stats?.totalCount || 0})
+                </div>
+                <div className="flex items-center gap-1.5 bg-primary/10 px-2.5 py-1 rounded-full text-xs font-bold border border-primary/20 text-primary">
+                  <Zap className="h-3 w-3 fill-current" />
+                  {formatUnits(endpoint.priceAmount, endpoint.tokenDecimals ?? 18)} {endpoint.tokenSymbol} / Call
                 </div>
                 {endpoint.tags &&
                   endpoint.tags.map((tag) => (
                     <Badge
                       key={tag}
                       variant="secondary"
-                      className="bg-primary/5 text-primary/70 border-primary/20 text-[10px] uppercase font-black px-2 py-0"
+                      className="bg-secondary text-secondary-foreground text-[10px] uppercase font-bold"
                     >
                       {tag}
                     </Badge>
@@ -452,81 +449,54 @@ export default function EndpointDetailPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className={`h-6 rounded-full bg-background/50 backdrop-blur-sm border-primary/20 text-[9px] font-black uppercase gap-1.5 hover:bg-primary/10 transition-all ${
-                    pingResult?.status === "active"
-                      ? "ring-2 ring-green-500/20"
-                      : pingResult?.status === "inactive" ||
-                          pingResult?.status === "error"
-                        ? "ring-2 ring-red-500/20"
-                        : ""
-                  }`}
+                  className="h-6 rounded-md text-[10px] font-bold uppercase gap-1.5 transition-colors"
                   onClick={handlePing}
                   disabled={pingLoading}
                 >
                   {pingLoading ? (
                     <Loader2 className="h-2.5 w-2.5 animate-spin" />
-                  ) : pingResult?.status === "active" ? (
-                    <Activity className="h-2.5 w-2.5 text-green-500" />
-                  ) : pingResult?.status === "inactive" ||
-                    pingResult?.status === "error" ? (
-                    <Activity className="h-2.5 w-2.5 text-red-500" />
                   ) : (
-                    <Activity className="h-2.5 w-2.5 text-primary" />
+                    <Activity className="h-2.5 w-2.5" />
                   )}
-                  {pingResult ? (
-                    <span
-                      className={
-                        pingResult.status === "active"
-                          ? "text-green-500"
-                          : "text-red-500"
-                      }
-                    >
-                      Health: {pingResult.status}
-                    </span>
-                  ) : (
-                    "Check Status"
-                  )}
+                  {pingResult ? `Status: ${pingResult.status}` : "Verify Health"}
                 </Button>
               </div>
               <div className="flex flex-col md:flex-row items-center md:items-center justify-between gap-4 mb-4">
-                <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight">
+                <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
                   {endpoint.description || "Unnamed API Endpoint"}
                 </h1>
                 <button
                   onClick={handleToggleFavorite}
                   disabled={toggleFavoriteMutation.isPending}
-                  className={`p-2.5 md:p-3 rounded-xl border transition-colors shrink-0 w-fit disabled:opacity-50 ${
+                  className={`p-2.5 rounded-lg border transition-colors shrink-0 ${
                     isFavorite
-                      ? "bg-red-500/10 border-red-500/20 text-red-500"
-                      : "bg-secondary border-border text-muted-foreground hover:text-red-500 hover:bg-secondary/80"
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-background border-border text-muted-foreground hover:bg-muted"
                   }`}
-                  title={
-                    isFavorite ? "Remove from favorites" : "Add to favorites"
-                  }
                 >
                   {toggleFavoriteMutation.isPending ? (
-                    <Loader2 className="h-6 w-6 animate-spin" />
+                    <Loader2 className="h-5 w-5 animate-spin" />
                   ) : (
                     <Heart
-                      className={`h-6 w-6 ${isFavorite ? "fill-current" : ""}`}
+                      className={`h-5 w-5 ${isFavorite ? "fill-current" : ""}`}
                     />
                   )}
                 </button>
               </div>
-              <div className="flex items-center justify-center md:justify-start gap-3 text-muted-foreground">
+              <div className="flex items-center justify-center md:justify-start gap-3 text-muted-foreground h-5">
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary border border-primary/20">
+                  <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center text-[10px] font-bold border border-border">
                     {endpoint.providerName?.[0] || "P"}
                   </div>
-                  <span className="text-sm font-medium">
+                  <span className="text-sm font-medium leading-none">
                     {endpoint.providerName || "Anonymous"}
                   </span>
                 </div>
-                <span className="text-muted-foreground/30">•</span>
+                <div className="w-1 h-1 rounded-full bg-muted-foreground/30 shrink-0" />
                 <Link
                   href={endpoint.docsUrl || "#"}
                   target="_blank"
-                  className="text-sm hover:text-primary flex items-center gap-1 transition-colors"
+                  className="text-sm hover:underline flex items-center gap-1 leading-none"
                 >
                   Documentation <ExternalLink className="h-3 w-3" />
                 </Link>
@@ -536,105 +506,163 @@ export default function EndpointDetailPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-6 -mt-6 md:-mt-10 lg:-mt-12 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 -mt-8 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="w-full flex justify-start overflow-x-auto scrollbar-hide bg-secondary/30 border border-border p-1 rounded-2xl h-auto mb-8">
-                <TabsTrigger
-                  value="overview"
-                  className="rounded-xl px-4 md:px-8 h-12 whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
-                >
-                  Overview
-                </TabsTrigger>
-                <TabsTrigger
-                  value="test"
-                  className="rounded-xl px-4 md:px-8 h-12 whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
-                >
-                  Try it Out
-                </TabsTrigger>
-                <TabsTrigger
-                  value="integration"
-                  className="rounded-xl px-4 md:px-8 h-12 whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
-                >
-                  Integration
-                </TabsTrigger>
-                <TabsTrigger
-                  value="specs"
-                  className="rounded-xl px-4 md:px-8 h-12 whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
-                >
-                  Technical Specs
-                </TabsTrigger>
-                <TabsTrigger
-                  value="reviews"
-                  className="rounded-xl px-4 md:px-8 h-12 whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all flex items-center gap-2"
-                >
-                  Reviews{" "}
-                  <Badge
-                    variant="secondary"
-                    className="px-1.5 py-0 h-4 min-w-[16px] flex items-center justify-center bg-black/10 dark:bg-white/10"
+              <div className="overflow-x-auto scrollbar-hide mb-8">
+                <TabsList className="flex w-full bg-muted border border-border p-1 rounded-xl h-auto flex-nowrap">
+                  <TabsTrigger
+                    value="overview"
+                    className="flex-1 rounded-lg px-2.5 md:px-8 h-10 text-xs md:text-sm whitespace-nowrap shrink-0 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
                   >
-                    {stats?.totalCount || 0}
-                  </Badge>
-                </TabsTrigger>
-              </TabsList>
-
+                    Overview
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="test"
+                    className="flex-1 rounded-lg px-2.5 md:px-8 h-10 text-xs md:text-sm whitespace-nowrap shrink-0 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+                  >
+                    Testing
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="integration"
+                    className="flex-1 rounded-lg px-2.5 md:px-8 h-10 text-xs md:text-sm whitespace-nowrap shrink-0 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+                  >
+                    Integration
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="specs"
+                    className="flex-1 rounded-lg px-2.5 md:px-8 h-10 text-xs md:text-sm whitespace-nowrap shrink-0 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+                  >
+                    Technical
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="reviews"
+                    className="flex-1 rounded-lg px-2.5 md:px-8 h-10 text-xs md:text-sm whitespace-nowrap shrink-0 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm flex items-center justify-center gap-2"
+                  >
+                    Reviews{" "}
+                    <Badge
+                      variant="secondary"
+                      className="px-1 py-0 h-4 min-w-[14px] text-[9px]"
+                    >
+                      {stats?.totalCount || 0}
+                    </Badge>
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+ 
               <TabsContent
                 value="overview"
-                className="space-y-8 mt-0 outline-none"
+                className="space-y-6 mt-0 outline-none"
               >
-                <div className="rounded-2xl border border-border bg-background p-6 md:p-8">
-                  <h3 className="text-2xl font-bold mb-6">API Overview</h3>
-                  <div className="space-y-6">
-                    <p className="text-base text-muted-foreground leading-relaxed">
-                      {endpoint.description || "No description provided."}
-                    </p>
-
-                  </div>
+                <div className="rounded-xl border border-border bg-card p-6 md:p-10">
+                  <h3 className="text-xl font-bold mb-4">API Overview</h3>
+                  <p className="text-base text-muted-foreground leading-relaxed">
+                    {endpoint.description || "The provider has not yet published an overview for this specific endpoint. Please refer to the global documentation for more details on the service capabilities."}
+                  </p>
                 </div>
-
+ 
                 {/* Sample Response */}
                 {endpoint.sampleResponse && (
-                  <div className="rounded-2xl border border-border bg-background p-6 md:p-8">
-                    <h3 className="flex items-center gap-2 text-xl font-bold mb-6">
-                      <Database className="h-5 w-5 text-primary" /> Sample Result
+                  <div className="rounded-xl border border-border bg-card p-6 md:p-10">
+                    <h3 className="flex items-center gap-2 text-xl font-bold mb-4">
+                      <Database className="h-5 w-5 text-muted-foreground" /> Sample Result
                     </h3>
-                    <pre className="p-6 rounded-xl bg-zinc-950 text-zinc-300 font-mono text-xs overflow-x-auto border border-zinc-800">
+                    <pre className="p-6 rounded-lg bg-muted text-foreground font-mono text-xs overflow-x-auto border border-border">
                       {endpoint.sampleResponse}
                     </pre>
                   </div>
                 )}
               </TabsContent>
+
               <TabsContent value="test" className="mt-0 outline-none">
                 <ApiTestPanel endpoint={endpoint} />
               </TabsContent>
 
               <TabsContent
-                value="specs"
-                className="space-y-8 mt-0 outline-none"
+                value="integration"
+                className="mt-0 outline-none"
               >
-                {/* Headers */}
-                <div className="rounded-2xl border border-border bg-background p-6 md:p-8">
+                <div className="rounded-xl border border-border bg-card p-6 md:p-10">
                   <div className="mb-6">
                     <h3 className="flex items-center gap-2 text-xl font-bold mb-1">
-                      <List className="h-5 w-5 text-primary" /> Upstream Headers
+                      <Code2 className="h-5 w-5 text-muted-foreground" /> Integration Guide
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      These headers are sent by the gateway to the provider.
+                      Standard implementation patterns for integrating this endpoint.
+                    </p>
+                  </div>
+                  <div>
+                    <Tabs defaultValue="curl" className="w-full">
+                      <TabsList className="grid w-full grid-cols-3 rounded-lg bg-muted mb-4 p-1">
+                        <TabsTrigger value="curl" className="rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                          cURL
+                        </TabsTrigger>
+                        <TabsTrigger value="js" className="rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                          JavaScript
+                        </TabsTrigger>
+                        <TabsTrigger value="python" className="rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                          Python
+                        </TabsTrigger>
+                      </TabsList>
+                      <TabsContent value="curl" className="relative group mt-0">
+                        <pre className="p-6 rounded-lg bg-muted text-foreground font-mono text-xs overflow-x-auto border border-border">
+                          {curlExample}
+                        </pre>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => copyToClipboard(curlExample)}
+                        >
+                          {copied ? (
+                            <Check className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </TabsContent>
+                      <TabsContent value="js" className="mt-0">
+                        <pre className="p-6 rounded-lg bg-muted text-muted-foreground font-mono text-xs overflow-x-auto border border-border">
+                           // x402 SDK Integration Guide coming soon...
+                        </pre>
+                      </TabsContent>
+                      <TabsContent value="python" className="mt-0">
+                        <pre className="p-6 rounded-lg bg-muted text-muted-foreground font-mono text-xs overflow-x-auto border border-border">
+                          # x402 SDK Integration Guide coming soon...
+                        </pre>
+                      </TabsContent>
+                    </Tabs>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent
+                value="specs"
+                className="space-y-6 mt-0 outline-none"
+              >
+                {/* Headers */}
+                <div className="rounded-xl border border-border bg-card p-6 md:p-10">
+                  <div className="mb-6">
+                    <h3 className="flex items-center gap-2 text-xl font-bold mb-1">
+                      <List className="h-5 w-5 text-muted-foreground" /> Protocol Headers
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Authoritative headers enforced by the gateway for this endpoint.
                     </p>
                   </div>
                   {endpoint.upstreamHeaders &&
                   endpoint.upstreamHeaders.length > 0 ? (
-                    <div className="rounded-xl border border-border overflow-hidden bg-background">
+                    <div className="rounded-lg border border-border overflow-hidden">
                       <table className="w-full text-sm">
-                        <thead className="bg-secondary/30 border-b border-border">
+                        <thead className="bg-muted border-b border-border">
                           <tr>
                             <th className="px-4 py-3 text-left font-bold tracking-wider uppercase text-[10px] text-muted-foreground">
-                              Name
+                              Header Name
                             </th>
                             <th className="px-4 py-3 text-left font-bold tracking-wider uppercase text-[10px] text-muted-foreground">
-                              Value
+                              Protocol Value
                             </th>
                           </tr>
                         </thead>
@@ -642,12 +670,12 @@ export default function EndpointDetailPage() {
                           {endpoint.upstreamHeaders.map((h, i) => (
                             <tr
                               key={i}
-                              className="hover:bg-secondary/30 transition-colors"
+                              className="bg-background"
                             >
-                              <td className="px-4 py-3 font-mono text-primary text-xs uppercase tracking-tight font-bold">
+                              <td className="px-4 py-3 font-mono text-foreground text-xs font-bold">
                                 {h.headerName}
                               </td>
-                              <td className="px-4 py-3 text-foreground truncate max-w-[200px] font-medium">
+                              <td className="px-4 py-3 text-muted-foreground truncate max-w-[200px] font-mono text-xs">
                                 {h.headerValue}
                               </td>
                             </tr>
@@ -656,26 +684,26 @@ export default function EndpointDetailPage() {
                       </table>
                     </div>
                   ) : (
-                    <div className="p-8 text-center rounded-xl border border-dashed border-border bg-secondary/10 text-muted-foreground font-semibold text-sm">
+                    <div className="p-8 text-center rounded-lg border border-dashed text-muted-foreground text-sm">
                       No upstream headers defined
                     </div>
                   )}
                 </div>
-
+ 
                 {/* Query Params */}
-                <div className="rounded-2xl border border-border bg-background p-6 md:p-8">
+                <div className="rounded-xl border border-border bg-card p-6 md:p-10">
                   <div className="mb-6">
                     <h3 className="flex items-center gap-2 text-xl font-bold mb-1">
-                      <Search className="h-5 w-5 text-primary" /> Query Parameters
+                      <Search className="h-5 w-5 text-muted-foreground" /> Query Parameters
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      Supported dynamic parameters for this API.
+                      Accepted dynamic parameters for API resolution.
                     </p>
                   </div>
                   {endpoint.queryParams && endpoint.queryParams.length > 0 ? (
-                    <div className="rounded-xl border border-border overflow-hidden bg-background">
+                    <div className="rounded-lg border border-border overflow-hidden">
                       <table className="w-full text-sm">
-                        <thead className="bg-secondary/30 border-b border-border">
+                        <thead className="bg-muted border-b border-border">
                           <tr>
                             <th className="px-4 py-3 text-left font-bold tracking-wider uppercase text-[10px] text-muted-foreground">
                               Name
@@ -684,7 +712,7 @@ export default function EndpointDetailPage() {
                               Type
                             </th>
                             <th className="px-4 py-3 text-left font-bold tracking-wider uppercase text-[10px] text-muted-foreground">
-                              Required
+                              Status
                             </th>
                             <th className="px-4 py-3 text-left font-bold tracking-wider uppercase text-[10px] text-muted-foreground">
                               Default
@@ -695,27 +723,27 @@ export default function EndpointDetailPage() {
                           {endpoint.queryParams.map((p, i) => (
                             <tr
                               key={i}
-                              className="hover:bg-secondary/30 transition-colors font-medium"
+                              className="bg-background"
                             >
-                              <td className="px-4 py-3 font-mono text-primary font-bold">
+                              <td className="px-4 py-3 font-mono text-foreground font-bold text-sm">
                                 {p.name}
                               </td>
                               <td className="px-4 py-3">
                                 <Badge
                                   variant="outline"
-                                  className="text-[10px] font-bold uppercase bg-secondary/30 border-border"
+                                  className="text-[10px] font-bold uppercase rounded"
                                 >
                                   {p.type}
                                 </Badge>
                               </td>
                               <td className="px-4 py-3">
                                 {p.required ? (
-                                  <Badge className="bg-red-500/10 text-red-500 border-red-500/20 uppercase text-[10px] font-bold">
-                                    Yes
+                                  <Badge className="bg-foreground text-background uppercase text-[10px] font-bold rounded">
+                                    Required
                                   </Badge>
                                 ) : (
                                   <span className="text-muted-foreground text-[10px] font-bold uppercase">
-                                    No
+                                    Optional
                                   </span>
                                 )}
                               </td>
@@ -728,67 +756,65 @@ export default function EndpointDetailPage() {
                       </table>
                     </div>
                   ) : (
-                    <div className="p-8 text-center rounded-xl border border-dashed border-border bg-secondary/10 text-muted-foreground font-semibold text-sm">
+                    <div className="p-8 text-center rounded-lg border border-dashed text-muted-foreground text-sm">
                       No query parameters defined
                     </div>
                   )}
                 </div>
-
+ 
                 {/* Request Body */}
-                <Card className="rounded-[2.5rem] border-border/50 shadow-xl overflow-hidden bg-card/50 backdrop-blur-sm">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-xl font-bold">
-                      <FileJson className="h-5 w-5 text-primary" /> Request Body
-                      Fields
-                    </CardTitle>
-                    <CardDescription>
-                      Fields that should be included in the JSON request body.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {endpoint.requestBody && endpoint.requestBody.length > 0 ? (
-                      <div className="rounded-2xl border border-border/50 overflow-hidden shadow-inner font-bold">
+                <div className="rounded-xl border border-border bg-card p-6 md:p-10">
+                  <div className="mb-6">
+                    <h3 className="flex items-center gap-2 text-xl font-bold mb-1 text-foreground">
+                      <FileJson className="h-5 w-5 text-muted-foreground" /> Request Body Schema
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      JSON payload fields required for state mutation.
+                    </p>
+                  </div>
+                  {endpoint.requestBody && endpoint.requestBody.length > 0 ? (
+                      <div className="rounded-lg border border-border overflow-hidden">
                         <table className="w-full text-sm">
-                          <thead className="bg-muted/50 border-b border-border/50">
+                          <thead className="bg-muted border-b border-border">
                             <tr>
-                              <th className="px-4 py-3 text-left font-black tracking-widest uppercase text-[10px]">
-                                Field
+                              <th className="px-4 py-3 text-left font-bold tracking-widest uppercase text-[10px] text-muted-foreground">
+                                Property
                               </th>
-                              <th className="px-4 py-3 text-left font-black tracking-widest uppercase text-[10px]">
+                              <th className="px-4 py-3 text-left font-bold tracking-widest uppercase text-[10px] text-muted-foreground">
                                 Type
                               </th>
-                              <th className="px-4 py-3 text-left font-black tracking-widest uppercase text-[10px]">
+                              <th className="px-4 py-3 text-left font-bold tracking-widest uppercase text-[10px] text-muted-foreground">
                                 Required
                               </th>
-                              <th className="px-4 py-3 text-left font-black tracking-widest uppercase text-[10px]">
+                              <th className="px-4 py-3 text-left font-bold tracking-widest uppercase text-[10px] text-muted-foreground">
                                 Example
                               </th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-border/50">
+                          <tbody className="divide-y divide-border">
                             {endpoint.requestBody.map((b, i) => (
                               <tr
                                 key={i}
-                                className="hover:bg-primary/5 transition-colors font-medium"
+                                className="bg-background"
                               >
-                                <td className="px-4 py-3 font-mono text-primary font-bold">
+                                <td className="px-4 py-3 font-mono text-foreground font-bold">
                                   {b.fieldName}
                                 </td>
                                 <td className="px-4 py-3">
                                   <Badge
                                     variant="outline"
-                                    className="text-[10px] font-bold uppercase"
+                                    className="text-[10px] font-bold uppercase rounded"
                                   >
                                     {b.fieldType}
                                   </Badge>
                                 </td>
                                 <td className="px-4 py-3">
                                   {b.required ? (
-                                    <Badge className="bg-red-500/10 text-red-500 border-red-500/20 uppercase text-[10px] font-black">
+                                    <Badge className="bg-foreground text-background uppercase text-[10px] font-bold rounded">
                                       Yes
                                     </Badge>
                                   ) : (
-                                    <span className="text-muted-foreground text-xs uppercase opacity-50 font-bold">
+                                    <span className="text-muted-foreground text-[10px] font-bold uppercase">
                                       No
                                     </span>
                                   )}
@@ -802,66 +828,10 @@ export default function EndpointDetailPage() {
                         </table>
                       </div>
                     ) : (
-                      <div className="p-8 text-center rounded-2xl border border-dashed text-muted-foreground opacity-50 font-bold">
+                      <div className="p-8 text-center rounded-lg border border-dashed text-muted-foreground text-sm">
                         No request body fields defined
                       </div>
                     )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="integration" className="mt-0 outline-none">
-                <div className="rounded-2xl border border-border bg-background p-6 md:p-8">
-                  <div className="mb-6">
-                    <h3 className="flex items-center gap-2 text-xl font-bold mb-1">
-                      <Code2 className="h-5 w-5 text-primary" /> Integration Guide
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Use the following sample to integrate this API into your application.
-                    </p>
-                  </div>
-                  <div>
-                    <Tabs defaultValue="curl" className="w-full">
-                      <TabsList className="grid w-full grid-cols-3 rounded-lg bg-secondary/30 mb-4 p-1">
-                        <TabsTrigger value="curl" className="rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                          cURL
-                        </TabsTrigger>
-                        <TabsTrigger value="js" className="rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                          JavaScript
-                        </TabsTrigger>
-                        <TabsTrigger value="python" className="rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                          Python
-                        </TabsTrigger>
-                      </TabsList>
-                      <TabsContent value="curl" className="relative group mt-0">
-                        <pre className="p-6 rounded-xl bg-zinc-950 text-zinc-300 font-mono text-xs overflow-x-auto border border-zinc-800">
-                          {curlExample}
-                        </pre>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity text-zinc-400 hover:text-white hover:bg-white/10"
-                          onClick={() => copyToClipboard(curlExample)}
-                        >
-                          {copied ? (
-                            <Check className="h-4 w-4 text-green-500" />
-                          ) : (
-                            <Copy className="h-4 w-4" />
-                          )}
-                        </Button>
-                      </TabsContent>
-                      <TabsContent value="js" className="mt-0">
-                        <pre className="p-6 rounded-xl bg-zinc-950 text-zinc-500 font-mono text-xs overflow-x-auto border border-zinc-800">
-                           // SDK Integration Guide coming soon...
-                        </pre>
-                      </TabsContent>
-                      <TabsContent value="python" className="mt-0">
-                        <pre className="p-6 rounded-xl bg-zinc-950 text-zinc-500 font-mono text-xs overflow-x-auto border border-zinc-800">
-                          # SDK Integration Guide coming soon...
-                        </pre>
-                      </TabsContent>
-                    </Tabs>
-                  </div>
                 </div>
               </TabsContent>
 
@@ -872,55 +842,54 @@ export default function EndpointDetailPage() {
                 {/* Review Form */}
                 {session ? (
                   existingReview && !isEditing ? (
-                    <div className="rounded-2xl border border-border bg-background p-6 md:p-8 flex flex-col items-center justify-center text-center">
-                      <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-4">
+                    <div className="rounded-xl border border-border bg-card p-6 md:p-10 flex flex-col items-center justify-center text-center">
+                      <div className="w-12 h-12 rounded-full bg-muted text-foreground flex items-center justify-center mb-4 border border-border">
                         <Check className="h-6 w-6" />
                       </div>
-                      <h3 className="text-xl font-bold mb-2">You reviewed this API</h3>
+                      <h3 className="text-xl font-bold mb-2">Verified Review</h3>
                       <p className="text-sm text-muted-foreground mb-6 max-w-sm">
-                        Thank you for your feedback! You can update your review if your experience has changed.
+                        You have already submitted a review for this endpoint.
                       </p>
-                      <Button onClick={startEditing} variant="outline" className="rounded-md font-semibold px-6">
-                        <MessageSquare className="h-4 w-4 mr-2" /> Edit Your Review
+                      <Button onClick={startEditing} variant="outline" className="rounded-lg font-semibold px-6">
+                        <Edit3 className="h-4 w-4 mr-2" /> Modify Review
                       </Button>
                     </div>
                   ) : (
-                    <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6 md:p-8">
+                    <div className="rounded-xl border border-border bg-card p-6 md:p-10">
                       <form onSubmit={handleReviewSubmit}>
                         <div className="mb-6">
-                          <h3 className="text-xl font-bold flex items-center gap-2 mb-1">
-                            <MessageSquare className="h-5 w-5 text-primary" />{" "}
-                            {isEditing ? "Update Your Review" : "Post a Review"}
+                          <h3 className="text-xl font-bold flex items-center gap-2 mb-1 text-foreground">
+                            {isEditing ? "Update Feedback" : "Submit Feedback"}
                           </h3>
-                          <p className="text-sm text-primary/60">
+                          <p className="text-sm text-muted-foreground">
                             {isEditing 
-                              ? "Modify your previous rating and feedback below." 
-                              : "Share your experience with this API with the community."}
+                              ? "Revise your rating and functional assessment." 
+                              : "Contribute to the registry by rating this endpoint's performance."}
                           </p>
                         </div>
                         <div className="space-y-6 mb-6">
                           <div className="space-y-3">
-                            <p className="text-sm font-bold">Rating</p>
+                            <p className="text-sm font-bold text-foreground">Performance Rating</p>
                             <div className="flex gap-1">
                               {[1, 2, 3, 4, 5].map((i) => (
                                 <button
                                   key={i}
                                   type="button"
                                   onClick={() => setRating(i)}
-                                  className="transition-transform hover:scale-110"
+                                  className="transition-colors"
                                 >
                                   <Star
-                                    className={`h-8 w-8 ${i <= rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`}
+                                    className={`h-7 w-7 ${i <= rating ? "fill-foreground text-foreground" : "text-muted border-none"}`}
                                   />
                                 </button>
                               ))}
                             </div>
                           </div>
                           <div className="space-y-3">
-                            <p className="text-sm font-bold">Your Feedback</p>
+                            <p className="text-sm font-bold text-foreground">Functional Assessment</p>
                             <Textarea
-                              placeholder="What was your experience using this API? Are the responses accurate and timely?"
-                              className="rounded-xl min-h-[120px] bg-background border-primary/20 focus-visible:ring-primary/30"
+                              placeholder="Provide technical feedback on latency, uptime, and data accuracy..."
+                              className="rounded-lg min-h-[100px] bg-background border-border focus-visible:ring-ring"
                               value={comment}
                               onChange={(e) => setComment(e.target.value)}
                             />
@@ -930,8 +899,8 @@ export default function EndpointDetailPage() {
                           {isEditing && (
                             <Button
                               type="button"
-                              variant="outline"
-                              className="rounded-md font-semibold px-6 h-10"
+                              variant="ghost"
+                              className="rounded-lg font-semibold px-6 h-10"
                               onClick={() => {
                                 setIsEditing(false);
                                 setRating(5);
@@ -943,30 +912,28 @@ export default function EndpointDetailPage() {
                           )}
                           <Button
                             type="submit"
-                            className="rounded-md font-semibold px-8 h-10"
+                            className="rounded-lg font-semibold px-8 h-10 bg-primary text-primary-foreground"
                             disabled={isEditing ? (editReviewMutation.isPending || (rating === existingReview?.rating && comment === existingReview?.comment)) : reviewMutation.isPending}
                           >
                             {(isEditing ? editReviewMutation.isPending : reviewMutation.isPending) ? (
                               <Loader2 className="h-4 w-4 animate-spin mr-2" />
                             ) : null}
-                            {isEditing ? "Update Review" : "Submit Review"}
+                            {isEditing ? "Update Review" : "Post Review"}
                           </Button>
                         </div>
                       </form>
                     </div>
                   )
                 ) : (
-                  <div className="rounded-2xl border border-dashed border-border bg-secondary/10 p-8 text-center flex flex-col items-center">
-                    <UserIcon className="h-10 w-10 text-muted-foreground mx-auto mb-4 opacity-30" />
-                    <h3 className="text-lg font-bold mb-2">
-                      Sign in to Review
-                    </h3>
+                  <div className="rounded-xl border border-dashed border-border bg-muted/30 p-10 text-center flex flex-col items-center">
+                    <UserIcon className="h-10 w-10 text-muted-foreground mx-auto mb-4 opacity-40" />
+                    <h3 className="text-lg font-bold mb-2">Registry Authentication</h3>
                     <p className="text-muted-foreground text-sm max-w-sm mb-6">
-                      You need to be logged in to share your experience with this API.
+                      User authentication is required to submit feedback to the global registry.
                     </p>
                     <Link href="/signin">
-                      <Button className="rounded-md font-semibold h-9 px-6 bg-primary text-primary-foreground">
-                        Connect Wallet / Sign In
+                      <Button className="rounded-lg font-semibold h-10 px-6 bg-primary text-primary-foreground">
+                        Sign In to Contribute
                       </Button>
                     </Link>
                   </div>
@@ -987,14 +954,14 @@ export default function EndpointDetailPage() {
                     [1, 2, 3].map((i) => (
                       <div
                         key={i}
-                        className="h-32 rounded-2xl bg-secondary/30 border border-border animate-pulse"
+                        className="h-24 rounded-xl bg-muted/30 border border-border"
                       />
                     ))
                   ) : reviews.length === 0 ? (
-                    <div className="text-center py-20 bg-secondary/10 rounded-2xl border border-dashed border-border">
-                      <MessageSquare className="h-10 w-10 text-muted-foreground mx-auto mb-4 opacity-30" />
-                      <p className="text-muted-foreground text-sm font-semibold">
-                        No reviews yet. Be the first to review!
+                    <div className="text-center py-16 bg-muted/20 rounded-xl border border-dashed border-border">
+                      <MessageSquare className="h-10 w-10 text-muted-foreground mx-auto mb-4 opacity-40" />
+                      <p className="text-muted-foreground text-sm font-medium">
+                        No technical audits submitted for this endpoint yet.
                       </p>
                     </div>
                   ) : (
@@ -1002,16 +969,17 @@ export default function EndpointDetailPage() {
                       {reviews.map((r) => (
                         <div
                           key={r.id}
-                          className="rounded-2xl border border-border bg-background p-6 group transition-colors hover:bg-secondary/30 flex flex-col gap-4"
+                          className="rounded-xl border border-border bg-card p-6 flex flex-col gap-4"
                         >
                           <div className="flex flex-row items-center gap-4">
-                             <div className="w-10 h-10 rounded-full bg-secondary text-primary border border-border flex items-center justify-center overflow-hidden shrink-0">
+                             <div className="w-10 h-10 rounded-full bg-muted text-foreground border border-border flex items-center justify-center overflow-hidden shrink-0">
                               {r.reviewerImage ? (
                                 <Image
                                   src={r.reviewerImage}
                                   alt={r.reviewerName || ""}
                                   width={40}
                                   height={40}
+                                  className="object-cover"
                                 />
                               ) : (
                                 <UserIcon className="h-5 w-5" />
@@ -1021,14 +989,14 @@ export default function EndpointDetailPage() {
                               <div className="flex justify-between items-start gap-4">
                                 <div className="flex items-center gap-2">
                                   <p className="font-bold text-sm truncate text-foreground">
-                                    {r.reviewerName || "Anonymous"}
+                                    {r.reviewerName || "Verified User"}
                                   </p>
                                   {session?.user?.id === r.reviewerId && (
-                                    <Badge variant="secondary" className="text-[9px] h-4 px-1 rounded bg-primary/10 text-primary border-none">You</Badge>
+                                    <Badge variant="outline" className="text-[9px] h-4 px-1 bg-muted border-border text-muted-foreground">Author</Badge>
                                   )}
                                 </div>
                                 <div className="flex items-center gap-2 shrink-0">
-                                  <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-tight h-5 flex items-center">
+                                  <span className="text-[10px] text-muted-foreground font-medium h-5 flex items-center">
                                     {new Date(r.createdAt).toLocaleDateString()}
                                   </span>
                                   {session?.user?.id === r.reviewerId && (
@@ -1036,40 +1004,34 @@ export default function EndpointDetailPage() {
                                       <button 
                                         onClick={startEditing}
                                         disabled={isEditing}
-                                        className="p-1 hover:bg-secondary rounded transition-colors text-muted-foreground hover:text-primary disabled:opacity-50"
-                                        title="Edit Review"
+                                        className="p-1 hover:bg-muted rounded transition-colors text-muted-foreground hover:text-foreground disabled:opacity-50"
                                       >
                                         <Edit3 className="h-3.5 w-3.5" />
                                       </button>
-
+ 
                                       <AlertDialog>
                                         <AlertDialogTrigger asChild>
                                           <button 
                                             disabled={deleteReviewMutation.isPending}
-                                            className="p-1 hover:bg-red-500/10 rounded transition-colors text-muted-foreground hover:text-red-500 disabled:opacity-50"
-                                            title="Delete Review"
+                                            className="p-1 hover:bg-destructive/10 rounded transition-colors text-muted-foreground hover:text-destructive disabled:opacity-50"
                                           >
-                                            {deleteReviewMutation.isPending ? (
-                                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                            ) : (
-                                              <Trash2 className="h-3.5 w-3.5" />
-                                            )}
+                                            <Trash2 className="h-3.5 w-3.5" />
                                           </button>
                                         </AlertDialogTrigger>
-                                        <AlertDialogContent className="rounded-2xl border-border bg-background">
+                                        <AlertDialogContent className="rounded-xl">
                                           <AlertDialogHeader>
-                                            <AlertDialogTitle className="text-xl font-bold">Delete Review?</AlertDialogTitle>
-                                            <AlertDialogDescription className="text-muted-foreground">
-                                              This will permanently remove your review and rating from this API endpoint. This action cannot be undone.
+                                            <AlertDialogTitle>Delete Audit?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                              This will permanently remove your technical feedback from the registry.
                                             </AlertDialogDescription>
                                           </AlertDialogHeader>
                                           <AlertDialogFooter>
-                                            <AlertDialogCancel className="rounded-xl border-border">Cancel</AlertDialogCancel>
+                                            <AlertDialogCancel className="rounded-lg">Cancel</AlertDialogCancel>
                                             <AlertDialogAction 
                                               onClick={() => deleteReviewMutation.mutate()}
-                                              className="rounded-xl bg-red-500 text-white hover:bg-red-600 border-none"
+                                              className="rounded-lg bg-destructive text-destructive-foreground"
                                             >
-                                              Delete Review
+                                              Delete
                                             </AlertDialogAction>
                                           </AlertDialogFooter>
                                         </AlertDialogContent>
@@ -1082,14 +1044,14 @@ export default function EndpointDetailPage() {
                                 {[1, 2, 3, 4, 5].map((star) => (
                                   <Star
                                     key={star}
-                                    className={`h-3.5 w-3.5 ${star <= r.rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`}
+                                    className={`h-3 w-3 ${star <= r.rating ? "fill-foreground text-foreground" : "text-muted"}`}
                                   />
                                 ))}
                               </div>
                             </div>
                           </div>
                           <div>
-                              <p className="text-sm text-muted-foreground leading-relaxed">
+                               <p className="text-sm text-muted-foreground leading-relaxed italic">
                               &quot;{r.comment}&quot;
                             </p>
                           </div>
@@ -1104,35 +1066,58 @@ export default function EndpointDetailPage() {
 
           {/* Sidebar */}
           <div className="space-y-6 w-full lg:sticky lg:top-24 h-fit">
-
-            <div className="rounded-2xl border border-border bg-background p-6 md:p-8 flex flex-col gap-6">
-              <h3 className="text-base font-bold text-foreground">
-                Deployment Metrics
+            {/* Price Card */}
+            <div className="rounded-xl border border-border bg-card p-6 md:p-8 flex flex-col gap-6">
+              <h3 className="text-sm font-bold text-foreground uppercase tracking-widest border-b pb-2 border-border/50">
+                Resource Access
               </h3>
               <div className="space-y-4">
-                <div className="flex justify-between items-center pb-4 border-b border-border">
-                  <span className="text-sm text-muted-foreground flex items-center gap-2 font-medium">
-                    <Star className="h-4 w-4 text-muted-foreground/70" />{" "}
-                    Average Rating
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs text-muted-foreground font-medium uppercase tracking-tighter">Protocol Fee per Execution</span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-bold tracking-tight text-foreground">
+                      {formatUnits(endpoint.priceAmount, endpoint.tokenDecimals ?? 18)}
+                    </span>
+                    <span className="text-sm font-bold text-muted-foreground uppercase">{endpoint.tokenSymbol}</span>
+                  </div>
+                </div>
+                
+                <div className="pt-4 border-t border-border/50">
+                  <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-medium">
+                    <Shield className="h-3 w-3" /> 
+                    <span>On-chain Payment Settlement</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Performance Card */}
+            <div className="rounded-xl border border-border bg-card p-6 md:p-8 flex flex-col gap-6">
+              <h3 className="text-sm font-bold text-foreground uppercase tracking-widest border-b pb-2 border-border/50">
+                Performance Data
+              </h3>
+              <div className="space-y-5">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-muted-foreground flex items-center gap-2 font-medium">
+                    <Star className="h-3.5 w-3.5" /> Verified Rating
                   </span>
                   <span className="text-sm font-bold text-foreground">
                     {stats?.averageRating.toFixed(1) || "0.0"} / 5.0
                   </span>
                 </div>
-                <div className="flex justify-between items-center pb-4 border-b border-border">
-                  <span className="text-sm text-muted-foreground flex items-center gap-2 font-medium">
-                    <MessageSquare className="h-4 w-4 text-muted-foreground/70" /> Total
-                    Reviews
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-muted-foreground flex items-center gap-2 font-medium">
+                    <MessageSquare className="h-3.5 w-3.5" /> Functional Audits
                   </span>
                   <span className="text-sm font-bold text-foreground">
                     {stats?.totalCount || 0}
                   </span>
                 </div>
-                <div className="flex justify-between items-center pt-2">
-                  <span className="text-sm text-muted-foreground flex items-center gap-2 font-medium">
-                    <Globe className="h-4 w-4 text-muted-foreground/70" /> Network Supported
+                <div className="flex justify-between items-center pt-2 border-t border-border/50">
+                  <span className="text-xs text-muted-foreground flex items-center gap-2 font-medium">
+                    <Globe className="h-3.5 w-3.5" /> Registry Network
                   </span>
-                  <Badge variant="secondary" className="font-mono text-[10px] uppercase bg-secondary/30">
+                  <Badge variant="outline" className="font-mono text-[10px] uppercase rounded-sm">
                     {endpoint.chainName}
                   </Badge>
                 </div>
@@ -1231,49 +1216,43 @@ function ApiTestPanel({ endpoint }: { endpoint: MarketplaceEndpointDetail }) {
       const response = await fetchWithPayment(fullUrl, requestInit);
 
       setData(response as object | string);
-      toast.success("API Call Successful");
+      toast.success("Execution Successful");
     } catch (err: unknown) {
       console.error(err);
-      const errMsg = err instanceof Error ? err.message : "Payment or API request failed";
+      const errMsg = err instanceof Error ? err.message : "Execution failed";
       setError(errMsg);
-      toast.error("API Call Failed");
     }
   };
 
   return (
-    <div className="rounded-2xl border border-border bg-background p-6 md:p-8 flex flex-col gap-8">
+    <div className="rounded-xl border border-border bg-card p-6 md:p-10 flex flex-col gap-8 shadow-none">
       <div>
-        <h3 className="flex items-center gap-2 text-xl font-bold mb-1">
-          <Zap className="h-5 w-5 text-primary" /> Test API Endpoint
+        <h3 className="flex items-center gap-2 text-xl font-bold mb-1 text-foreground">
+          <Zap className="h-5 w-5" /> Operational Testing
         </h3>
         <p className="text-sm text-muted-foreground">
-          Make a paid request to this API. You will be prompted to pay{" "}
+          Execute a verified request to the provider gateway. A protocol fee of{" "}
           {formatUnits(endpoint.priceAmount, endpoint.tokenDecimals ?? 18)}{" "}
-          {endpoint.tokenSymbol} per call.
+          {endpoint.tokenSymbol} applies per execution.
         </p>
       </div>
         {/* Query Parameters Section */}
         {endpoint.queryParams && endpoint.queryParams.length > 0 && (
           <div className="space-y-4">
-            <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-              Query Parameters
+            <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+              Query Authorization
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {endpoint.queryParams.map((p) => (
-                <div key={p.name} className="space-y-1.5">
-                  <label className="text-xs font-bold ml-1 flex items-center gap-1">
+                <div key={p.name} className="space-y-2">
+                  <label className="text-[10px] font-bold uppercase ml-1 flex items-center gap-1 text-muted-foreground">
                     {p.name}{" "}
-                    {p.required && <span className="text-red-500">*</span>}
-                    <Badge
-                      variant="outline"
-                      className="text-[10px] py-0 px-1 opacity-50"
-                    >
-                      {p.type}
-                    </Badge>
+                    {p.required && <span className="text-destructive">*</span>}
+                    <span className="opacity-50">({p.type})</span>
                   </label>
                   <Input
-                    placeholder={`Enter ${p.name}...`}
-                    className="rounded-xl bg-background/50 border-border/50 focus:border-primary/50 transition-colors"
+                    placeholder={`${p.name}`}
+                    className="rounded-lg bg-background border-border focus:ring-1 focus:ring-ring h-10"
                     value={queryParams[p.name] || ""}
                     onChange={(e) =>
                       setQueryParams((prev) => ({
@@ -1282,39 +1261,29 @@ function ApiTestPanel({ endpoint }: { endpoint: MarketplaceEndpointDetail }) {
                       }))
                     }
                   />
-                  {p.description && (
-                    <p className="text-[10px] text-muted-foreground ml-1 opacity-70 italic">
-                      {p.description}
-                    </p>
-                  )}
                 </div>
               ))}
             </div>
           </div>
         )}
-
+ 
         {/* Request Body Section */}
         {endpoint.requestBody && endpoint.requestBody.length > 0 && (
-          <div className="space-y-4 pt-4 border-t border-border/10">
-            <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-              Request Body (JSON)
+          <div className="space-y-4 pt-4 border-t border-border">
+            <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+              Payload Specifications
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {endpoint.requestBody.map((b) => (
-                <div key={b.fieldName} className="space-y-1.5">
-                  <label className="text-xs font-bold ml-1 flex items-center gap-1">
+                <div key={b.fieldName} className="space-y-2">
+                  <label className="text-[10px] font-bold uppercase ml-1 flex items-center gap-1 text-muted-foreground">
                     {b.fieldName}{" "}
-                    {b.required && <span className="text-red-500">*</span>}
-                    <Badge
-                      variant="outline"
-                      className="text-[10px] py-0 px-1 opacity-50"
-                    >
-                      {b.fieldType}
-                    </Badge>
+                    {b.required && <span className="text-destructive">*</span>}
+                    <span className="opacity-50">({b.fieldType})</span>
                   </label>
                   <Input
-                    placeholder={`Enter ${b.fieldName}...`}
-                    className="rounded-xl bg-background/50 border-border/50 focus:border-primary/50 transition-colors font-mono text-xs"
+                    placeholder={`${b.fieldName}`}
+                    className="rounded-lg bg-background border-border focus:ring-1 focus:ring-ring h-10 font-mono text-xs"
                     value={
                       typeof bodyFields[b.fieldName] === "object"
                         ? JSON.stringify(bodyFields[b.fieldName])
@@ -1328,88 +1297,83 @@ function ApiTestPanel({ endpoint }: { endpoint: MarketplaceEndpointDetail }) {
                       }));
                     }}
                   />
-                  {b.description && (
-                    <p className="text-[10px] text-muted-foreground ml-1 opacity-70 italic">
-                      {b.description}
-                    </p>
-                  )}
                 </div>
               ))}
             </div>
           </div>
         )}
-
+ 
         <div className="pt-6 space-y-4">
-          <div className="flex justify-center bg-muted/20 p-4 rounded-2xl border-2 border-dashed border-primary/20 min-h-[60px] items-center">
+          <div className="flex justify-center bg-muted p-6 rounded-lg border border-border border-dashed">
             {isMounted ? (
               <ConnectButton
                 client={client}
                 theme="dark"
                 connectButton={{
-                  label: "Connect Wallet",
-                  className: "h-9 px-3 text-xs",
+                  label: "Connect Protocol Wallet",
+                  className: "h-10 px-6 text-sm rounded-lg",
                 }}
               />
             ) : (
-              <div className="h-9 w-32 bg-muted/50 animate-pulse rounded-lg" />
+              <div className="h-10 w-32 bg-muted-foreground/10 animate-pulse rounded-lg" />
             )}
           </div>
           <Button
             onClick={handleApiCall}
             disabled={isPending}
-            className="w-full h-14 rounded-xl font-bold bg-primary text-primary-foreground hover:bg-primary/90 flex items-center justify-center gap-2 transition-transform active:scale-[0.98]"
+            className="w-full h-12 rounded-lg font-bold bg-primary text-primary-foreground hover:bg-primary/90 flex items-center justify-center gap-2"
           >
             {isPending ? (
               <>
-                <Loader2 className="h-5 w-5 animate-spin" /> Authorizing Payment...
+                <Loader2 className="h-5 w-5 animate-spin" /> Authorizing Settlement...
               </>
             ) : (
               <>
-                <Zap className="h-5 w-5 fill-current" /> Execute Paid API Call
+                <Zap className="h-4 w-4" /> Execute Paid Execution
               </>
             )}
           </Button>
         </div>
-
+ 
         {/* Error Box */}
         {error && (
-          <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
+          <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive flex items-start gap-3">
             <Shield className="h-5 w-5 shrink-0 mt-0.5" />
             <div className="space-y-1">
-              <p className="text-sm font-bold">Request Failed</p>
-              <p className="text-xs opacity-80">{error}</p>
+              <p className="text-sm font-bold">Execution Error</p>
+              <p className="text-xs opacity-80 font-mono">{error}</p>
             </div>
           </div>
         )}
-
+ 
         {/* Response Visualizer */}
         {data && (
-          <div className="space-y-4 pt-6 border-t border-border/10 animate-in zoom-in-95 fill-mode-both duration-300">
+          <div className="space-y-4 pt-6 border-t border-border">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <FileJson className="h-5 w-5 text-green-500" />
-                <h4 className="text-sm font-extrabold uppercase tracking-tighter">
-                  Response Payload
+                <FileJson className="h-4 w-4 text-muted-foreground" />
+                <h4 className="text-xs font-bold uppercase tracking-wider">
+                  Gateway Response
                 </h4>
               </div>
               <Badge
                 variant="outline"
-                className="text-green-500 bg-green-500/10 border-green-500/20 font-black uppercase tracking-tighter"
+                className="text-[10px] font-bold border-border bg-muted rounded"
               >
-                HTTP 200 OK
+                STATUS: 200 SUCCESS
               </Badge>
             </div>
             <div className="relative group">
-              <pre className="p-6 rounded-2xl bg-zinc-950 text-zinc-300 font-mono text-xs overflow-auto max-h-[400px] shadow-2xl border border-zinc-800 scrollbar-thin scrollbar-thumb-primary/20">
+              <pre className="p-6 rounded-lg bg-muted text-foreground font-mono text-xs overflow-auto max-h-[300px] border border-border">
                 {typeof data === "string" ? data : JSON.stringify(data, null, 2)}
               </pre>
               <Button
                 size="icon"
                 variant="ghost"
-                className="absolute top-4 right-4 text-zinc-500 hover:text-white transition-colors"
+                className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"
                 onClick={() => {
                   navigator.clipboard.writeText(JSON.stringify(data, null, 2));
-                  toast.success("Response copied to clipboard");
+                  toast.success("Payload copied");
                 }}
               >
                 <Copy className="h-4 w-4" />
@@ -1417,9 +1381,9 @@ function ApiTestPanel({ endpoint }: { endpoint: MarketplaceEndpointDetail }) {
             </div>
           </div>
         )}
-      <div className="pt-2 border-t border-border">
-        <p className="text-[10px] text-muted-foreground flex items-center justify-center gap-2 font-medium">
-          <Shield className="h-3 w-3" /> Secure x402 Payment Settlement via Thirdweb
+      <div className="pt-4 border-t border-border mt-2">
+        <p className="text-[10px] text-muted-foreground flex items-center justify-center gap-2 font-medium uppercase tracking-tighter">
+          <Shield className="h-3 w-3" /> Encrypted x402 Gateway Transaction via Thirdweb Protocol
         </p>
       </div>
     </div>
