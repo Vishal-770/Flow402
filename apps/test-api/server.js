@@ -160,9 +160,9 @@ app.get('/v1/finance/conversion', (req, res) => {
     success: true,
     from,
     to,
-    amount: parseFloat(amount as string),
+    amount: parseFloat(amount),
     rate: parseFloat(rate),
-    result: (parseFloat(amount as string) * parseFloat(rate)).toFixed(2),
+    result: (parseFloat(amount) * parseFloat(rate)).toFixed(2),
     timestamp: new Date().toISOString()
   });
 });
@@ -184,7 +184,7 @@ app.get('/v1/inventory/lookup', (req, res) => {
 
 app.get('/v1/news/aggregate', (req, res) => {
   const { topic = 'Technology', limit = '3' } = req.query;
-  const numLimit = parseInt(limit as string) || 3;
+  const numLimit = parseInt(limit) || 3;
   const articles = Array.from({ length: numLimit }).map((_, i) => ({
     id: i + 1,
     title: `${topic} News Item ${i + 1}`,
@@ -202,16 +202,16 @@ app.get('/v1/news/aggregate', (req, res) => {
 app.get('/v1/crypto/gas', (req, res) => {
   const { chain = 'ethereum', speed = 'standard' } = req.query;
   const baseGas = Math.floor(Math.random() * 50) + 10;
-  const speeds: Record<string, number> = {
+  const speeds = {
     slow: baseGas * 0.8,
     standard: baseGas,
     fast: baseGas * 1.5
   };
   res.json({
     success: true,
-    chain: (chain as string).toLowerCase(),
+    chain: chain.toLowerCase(),
     requested_speed: speed,
-    gwei: Math.floor(speeds[speed as string] || baseGas),
+    gwei: Math.floor(speeds[speed] || baseGas),
     estimated_seconds: speed === 'fast' ? 15 : speed === 'standard' ? 60 : 300
   });
 });
