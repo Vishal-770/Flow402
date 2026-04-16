@@ -385,8 +385,9 @@ export default function EndpointDetailPage() {
     );
   }
 
-  const gatewayBaseUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || "https://gateway.flow402.com";
-  const curlExample = `curl -X POST "${gatewayBaseUrl}${endpoint.gatewayPath}" \\
+  const gatewayBaseUrl = (process.env.NEXT_PUBLIC_GATEWAY_URL || "https://gateway.flow402.com").replace(/\/$/, "");
+  const normalizedPath = endpoint.gatewayPath?.startsWith("/") ? endpoint.gatewayPath : `/${endpoint.gatewayPath}`;
+  const curlExample = `curl -X POST "${gatewayBaseUrl}${normalizedPath}" \\
   -H "Content-Type: application/json" \\
   -H "X-API-Key: YOUR_API_KEY" \\
   -d '{"query": "example"}'`;
@@ -1196,9 +1197,9 @@ function ApiTestPanel({ endpoint }: { endpoint: MarketplaceEndpointDetail }) {
 
     try {
       // Construct base URL
-      const gatewayUrl =
-        process.env.NEXT_PUBLIC_GATEWAY_URL || "https://gateway.flow402.com";
+      const gatewayUrl = (process.env.NEXT_PUBLIC_GATEWAY_URL || "https://gateway.flow402.com").replace(/\/$/, "");
       const path = endpoint.gatewayPath || "/";
+      const normalizedPath = path.startsWith("/") ? path : `/${path}`;
 
       // Build query string
       const searchParams = new URLSearchParams();
@@ -1207,7 +1208,7 @@ function ApiTestPanel({ endpoint }: { endpoint: MarketplaceEndpointDetail }) {
       });
 
       const queryString = searchParams.toString();
-      const fullUrl = `${gatewayUrl}${path}${queryString ? `?${queryString}` : ""}`;
+      const fullUrl = `${gatewayUrl}${normalizedPath}${queryString ? `?${queryString}` : ""}`;
       const inferredMethod =
         endpoint.requestBody && endpoint.requestBody.length > 0
           ? "POST"
