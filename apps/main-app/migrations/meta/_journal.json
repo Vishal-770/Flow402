@@ -29,6 +29,20 @@
       "when": 1774367564825,
       "tag": "0003_luxuriant_epoch",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1776337019918,
+      "tag": "0004_confused_korg",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1776337509752,
+      "tag": "0005_add_admin_fields",
+      "breakpoints": true
     }
   ]
 }
